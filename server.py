@@ -29,7 +29,7 @@ def read(conn, addr):
         msg_length = int(msg_length)
         msg = conn.recv(msg_length).decode(FORMAT)
         return msg
-
+ 
 
 def handle_client(conn, addr, users):
     print(f"[NEW CONNECTION] {addr} connected")
