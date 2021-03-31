@@ -16,7 +16,7 @@ def read():
     if msg_length:
         msg_length = int(msg_length)
         msg = client.recv(msg_length).decode(FORMAT)
-    return msg
+    return msg 
 
 def send(msg):
     message = msg.encode(FORMAT)
