@@ -2,11 +2,11 @@
 Projeto RC
 
 
-Softwares:
-Repositório de versões - GitHub
-Chat e outras infos - Discord
-Relatorios - Overleaf
-Organização - Trello
-Programação - Python e SQL
-Base de dados - pgadmin4(Postgresql)
+Softwares: <br>
+Repositório de versões - GitHub <br>
+Chat e outras infos - Discord <br>
+Relatorios - Overleaf <br>
+Organização - Trello <br>
+Programação - Python e SQL <br>
+Base de dados - pgadmin4(Postgresql) <br>
 Diagrama ER - onda.dei.uc.pt
