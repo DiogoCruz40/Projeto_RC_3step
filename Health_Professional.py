@@ -8,17 +8,15 @@ DISCONNECT_MSG = '!DISCONNECT'
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
 
-def read():      
+def read(client):      
     msg_length = client.recv(HEADER).decode(FORMAT)
     if msg_length:
         msg_length = int(msg_length)
         msg = client.recv(msg_length).decode(FORMAT)
     return msg 
 
-def send(msg):
+def send(msg, client):
     message = msg.encode(FORMAT)
     msg_length = len(message)
     send_length = str(msg_length).encode(FORMAT)
@@ -26,15 +24,20 @@ def send(msg):
     client.send(send_length)
     client.send(message)
 
+def main():
 
 
-print(read()) #Read People Menu
-opt = input('USER:')
-# send(opt) # Send person to talk to
-# opt = input('Password: ')
-# send(opt) #Send content
-# print(read()) #Job
-send(DISCONNECT_MSG)
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect(ADDR)
+
+
+    print(read(client)) #Read People Menu
+    opt = input('USER:')
+    # send(opt) # Send person to talk to
+    # opt = input('Password: ')
+    # send(opt) #Send content
+    # print(read()) #Job
+    send(DISCONNECT_MSG, client)
 
 
 

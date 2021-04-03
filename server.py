@@ -1,12 +1,15 @@
 import socket
 import threading
 import os
+import psycopg2.extras
+from passlib.handlers.sha2_crypt import sha256_crypt
 
 HEADER = 64
 SERVER = socket.gethostbyname(socket.gethostname())
 #SERVER = '192.168.1.70'
 FORMAT = 'utf-8' 
 DISCONNECT_MSG = '!DISCONNECT'
+
 
 
 def send(msg, conn):
@@ -24,14 +27,14 @@ def read(conn, addr):
         msg = conn.recv(msg_length).decode(FORMAT)
         return msg
  
-#============================================================================================================================#
+#===================================================HEALTH PROFESSIONAL========================================================#
 
 
 def handle_professional(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
     while connected:
-        send('Health Professional', conn)
+        send('Health Professional CONNECTED', conn)
         msg = read(conn, addr)
         
         if msg == DISCONNECT_MSG:
@@ -39,25 +42,74 @@ def handle_professional(conn, addr):
               
     conn.close()
 
+#=======================================================SYSTEM MANAGER===========================================================#
 
 def handle_manager(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
     while connected:
-        send('System Manager', conn)
-        msg = read(conn, addr)
-        
-        if msg == DISCONNECT_MSG:
-            connected = False
-                  
+        send('System Manager CONNECTED', conn)
+        opt = int(read(conn, addr))
+        if opt == 1:
+            loginverify(conn, addr)
+        if opt == 2:
+            signupverify(conn, addr)
+        if opt == 3:
+            connected = False         
     conn.close()
 
+def loginverify(conn, addr):
+   
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    while 1:
+        mail = read(conn, addr)
+        cur.execute("SELECT pass FROM gestor_sistema WHERE email_g=%s",(mail,))
+        if cur.rowcount == 1:
+            password = cur.fetchone()[0]
+            password_login = read(conn,addr)
+            verifypass=sha256_crypt.verify(password_login, password)
+            if verifypass:
+                send('True', conn)
+                break
+            send('False', conn)
+            continue
+        send('False', conn)
+    
+    connDB.close()
+    cur.close()
+    return
+
+def signupverify(conn, addr):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    while 1:
+        mail = read(conn, addr)
+        cur.execute("SELECT email_g FROM gestor_sistema WHERE email_g=%s",(mail,))
+        if cur.rowcount > 0:
+            send('already exists',conn)
+            
+        else:
+            send('Nao existe',conn)
+            password = read(conn,addr)
+            cur.execute("INSERT INTO gestor_sistema(email_g, pass) VALUES (%s,%s)",(mail,password))
+            connDB.commit()
+            break
+        
+    connDB.close()
+    cur.close()
+    return
+
+
+
+    
+#===========================================================SECURITY OFFICER======================================================#
 
 def handle_security(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
     while connected:
-        send('Security Officer', conn)
+        send('Security Officer CONNECTED', conn)
         msg = read(conn, addr)
         
         if msg == DISCONNECT_MSG:
