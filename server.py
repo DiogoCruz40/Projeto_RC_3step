@@ -24,22 +24,51 @@ def read(conn, addr):
         msg = conn.recv(msg_length).decode(FORMAT)
         return msg
  
+#============================================================================================================================#
 
-def handle_client(conn, addr):
+
+def handle_professional(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
     while connected:
-        send('hi', conn)
+        send('Health Professional', conn)
         msg = read(conn, addr)
         
         if msg == DISCONNECT_MSG:
             connected = False
-
-        
-            
+              
     conn.close()
 
-def start(PORT):
+
+def handle_manager(conn, addr):
+    print(f"[NEW CONNECTION] {addr} connected")
+    connected = True
+    while connected:
+        send('System Manager', conn)
+        msg = read(conn, addr)
+        
+        if msg == DISCONNECT_MSG:
+            connected = False
+                  
+    conn.close()
+
+
+def handle_security(conn, addr):
+    print(f"[NEW CONNECTION] {addr} connected")
+    connected = True
+    while connected:
+        send('Security Officer', conn)
+        msg = read(conn, addr)
+        
+        if msg == DISCONNECT_MSG:
+            connected = False
+                 
+    conn.close()
+
+
+#============================================================================================================================#
+
+def start(PORT, SERVER):
     ADDR =  (SERVER, PORT)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
@@ -47,32 +76,35 @@ def start(PORT):
     print(f'[LISTENING] Server is listening on {SERVER}')
     while True:
         conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
+        if PORT == 5050:
+            thread = threading.Thread(target=handle_professional, args=(conn, addr))
+        elif PORT == 9050:
+            thread = threading.Thread(target=handle_manager, args=(conn, addr))
+        elif PORT == 9000:
+            thread = threading.Thread(target=handle_security , args=(conn, addr))
         thread.start()
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
 
 
-def main():
+def main(SERVER):
     print("[STARTING] server is starting...")
     pid = os.fork()
-    pid2 = os.fork()
-
-    if pid > 0 :
-        print('parent')
-        start(5050)
-
-    else:
-        print('child')
-        start(5051)
-
-    if pid2 > 0:
-        print('parent2')
-        start(5052)
     
-    else:
-        exit()
+    if pid == 0 :
+        print('Health Professional')
+        start(5050, SERVER)
 
+    else:
+        pid2 = os.fork()
+        if pid2 == 0:
+            print('System Manager')
+            start(9050, SERVER)
+    
+        else:
+            print('Security Officer')
+            start(9000, SERVER)
+       
 
 
 if __name__ == "__main__":
-    main()
+    main(SERVER)

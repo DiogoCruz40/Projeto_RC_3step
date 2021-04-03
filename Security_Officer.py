@@ -2,10 +2,10 @@ import socket
 
 
 HEADER = 64
-PORT = 5050
+PORT = 9000
 FORMAT = 'utf-8' 
 DISCONNECT_MSG = '!DISCONNECT'
-SERVER = '192.168.56.1'
+SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,13 +30,10 @@ def send(msg):
 
 print(read()) #Read People Menu
 opt = input('USER:')
-send(opt) # Send person to talk to
-opt = input('Password: ')
-send(opt) #Send content
-print(read()) #Job
-
-
-
+# send(opt) # Send person to talk to
+# opt = input('Password: ')
+# send(opt) #Send content
+# print(read()) #Job
 send(DISCONNECT_MSG)
 
 
