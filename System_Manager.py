@@ -33,11 +33,11 @@ def secure_pass(prompt=''):
 def emailREGEX(pergunta):
     while True:
         email = input(pergunta)
-        return str(email)
-        #if bool(re.match('^[a-zA-Z0-9]+[\._]?[a-zA-Z0-9]+\w[@]+[.]\w+$', email)):
-            
-       # else:
-        print("Erro: Insira um email válido \n")
+        print(email)
+        if re.match('^[a-zA-Z0-9]+[\._]?[a-zA-Z0-9]+\w[@]+[.]\w+$',email):
+            return email
+        else:
+            print("Erro: Insira um email válido \n")
     
 
 
@@ -64,36 +64,42 @@ def send(msg, client):
 
 def login(client):
     while 1:
-        mail = emailREGEX('Mail: ').lower()
+        #mail = emailREGEX('Mail: ').lower()
+        mail=input('Mail: ')
         send(mail,client)
-        print("Password: ")
+        if read(client) == 'Mail False':
+            print('Mail doesnt exist\n')
+            continue
+
+        #print("Password: ")
         #password = secure_pass()
-        password = input('pass pls : ')
+
+        password=input('Password: ')
         send(password, client)
-        if read(client) == 'True':
+        flagpass=read(client)
+        if  flagpass == 'True':
             print('Logged in\n')
             break
-        elif read(client) == 'False':
+        elif flagpass == 'False':
             print('Failed to Login\n')
 
 
 def signup(client):
     while 1:
-        mail = emailREGEX('Mail: ').lower()
+       # mail = emailREGEX('Mail: ').lower()
+        mail=input('Mail: ')
         send(mail, client)
         if read(client) == 'already exists':
             print('This mail already exists\n')
             continue
         else:
-            print("Password: ")
-            #password=secure_pass()
-            password = input('pass pls : ')
-            epchave = sha256_crypt.hash(password)
-            send(epchave,client)
             break
 
-        
-        
+    #print("Password: ")
+    #password=secure_pass()
+    password=input('Password: ')
+    epchave = sha256_crypt.hash(password)
+    send(epchave,client)
 
 
 

@@ -49,13 +49,19 @@ def handle_manager(conn, addr):
     connected = True
     while connected:
         send('System Manager CONNECTED', conn)
-        opt = int(read(conn, addr))
-        if opt == 1:
-            loginverify(conn, addr)
-        if opt == 2:
-            signupverify(conn, addr)
-        if opt == 3:
-            connected = False         
+        
+        try:
+            opt = int(read(conn, addr))
+            if opt == 1:
+                loginverify(conn, addr)
+            if opt == 2:
+                signupverify(conn, addr)
+            if opt == 3:
+                connected = False      
+
+        except Exception as e:
+            print(e)
+   
     conn.close()
 
 def loginverify(conn, addr):
@@ -66,15 +72,19 @@ def loginverify(conn, addr):
         mail = read(conn, addr)
         cur.execute("SELECT pass FROM gestor_sistema WHERE email_g=%s",(mail,))
         if cur.rowcount == 1:
+            send('Mail True',conn)
             password = cur.fetchone()[0]
             password_login = read(conn,addr)
             verifypass=sha256_crypt.verify(password_login, password)
             if verifypass:
                 send('True', conn)
                 break
-            send('False', conn)
+            else:
+                send('False', conn)
+                continue
+        else:
+            send('Mail False', conn)
             continue
-        send('False', conn)
     
     connDB.close()
     cur.close()
@@ -88,13 +98,12 @@ def signupverify(conn, addr):
         cur.execute("SELECT email_g FROM gestor_sistema WHERE email_g=%s",(mail,))
         if cur.rowcount > 0:
             send('already exists',conn)
-            
         else:
             send('Nao existe',conn)
-            password = read(conn,addr)
-            cur.execute("INSERT INTO gestor_sistema(email_g, pass) VALUES (%s,%s)",(mail,password))
-            connDB.commit()
-            break
+        password = read(conn,addr)
+        cur.execute("INSERT INTO gestor_sistema(email_g, pass) VALUES (%s,%s)",(mail,password))
+        connDB.commit()
+        break
         
     connDB.close()
     cur.close()
