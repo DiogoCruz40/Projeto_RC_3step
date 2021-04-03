@@ -28,8 +28,6 @@ def send(msg):
 
 
 
-
-
 print(read()) #Read People Menu
 opt = input('USER:')
 send(opt) # Send person to talk to
