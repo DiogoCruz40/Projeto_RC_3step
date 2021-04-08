@@ -254,7 +254,13 @@ def start(PORT, SERVER):
         elif PORT == 8300:
             thread = threading.Thread(target=handle_security , args=(conn, addr))
         thread.start()
-        print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+        
+        if PORT==8100:
+            print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Health_Professionals")
+        if PORT==8200:
+            print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of System_Managers")
+        if PORT==8300:
+            print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Security officers")
 
 
 def main(SERVER):
