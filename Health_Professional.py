@@ -10,10 +10,10 @@ DISCONNECT_MSG = '!DISCONNECT'
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 
-def secure_pass():
+def secure_pass(param):
 
     while True:
-        password = stdiomask.getpass()
+        password = stdiomask.getpass(prompt=param)
 
         if not password or " " in password:
           print("Não pode ter espaços!")
@@ -61,7 +61,7 @@ def login(client):
             print('Mail doesnt exist')
             continue
 
-        password = secure_pass()
+        password = secure_pass('Password:')
         send(password, client) #3
         flagpass=read(client) #4
         if  flagpass == 'True':
@@ -108,7 +108,7 @@ def changeprofile(client,mail):
 def changemail(client,email):
     while 1:
         print('\nHello',mail,',')
-        password = secure_pass()
+        password = secure_pass('Password:')
         send(password, client) 
         if read(client) == 'True Password':
             newmail = emailREGEX('New Mail: ').lower()
@@ -127,11 +127,10 @@ def changemail(client,email):
 def changepassword(client,email):
     while 1:
         print('\nHello',mail,',')
-        password = secure_pass()
+        password = secure_pass('Current Password:')
         send(password, client) 
         if read(client) == 'True Password':
-            print('\nNew Password')
-            newpassword = secure_pass()
+            newpassword = secure_pass('New password:')
             send(newpassword, client)
         else:
             print('Wrong password')
@@ -151,7 +150,7 @@ def signup(client):
             print('This mail already exists')
             continue
         else:
-            password=secure_pass()
+            password = secure_pass('Password:')
             epchave = sha256_crypt.hash(password)
             send(epchave,client) #3
             break
