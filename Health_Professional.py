@@ -31,12 +31,8 @@ def emailREGEX(pergunta):
         if bool(re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$)", email)):
             return str(email)
         else:
-            print("Erro: Insira um email válido \n")
+            print("Erro: Insira um email válido")
     
-
-
-
-
 #==========================================================================================================#
 
 def read(client):      
@@ -54,32 +50,105 @@ def send(msg, client):
     client.send(send_length)
     client.send(message)
 
-#==========================================================================================================#
+#==========================================Login============================================================#
 
 def login(client):
     while 1:
+        print('\nLogin Health Professional')
         mail = emailREGEX('Mail: ').lower()
         send(mail,client) #1
         if read(client) == 'Mail False': #2
-            print('Mail doesnt exist\n')
+            print('Mail doesnt exist')
             continue
 
         password = secure_pass()
         send(password, client) #3
         flagpass=read(client) #4
         if  flagpass == 'True':
-            print('Logged in\n')
+            menulogin(client,mail)
             break
         elif flagpass == 'False':
-            print('Failed to Login\n')
+            print('Failed to Login')
 
 
+def menulogin(client,mail):
+    while 1:
+        try:
+            print('\nHello',mail,',')
+            option=input('1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
+            if option == '1':
+                continue
+            elif option == '2':
+                changeprofile(client,mail)
+            elif option == '3':
+                eraseaccount(client,mail)
+            elif option == '4':
+                return
+                
+        except Exception as e:
+            print(e)
+
+#==============Change profile====================================#
+
+def changeprofile(client,mail):
+     while 1:
+        try:
+            print('\nHello',mail,',')
+            option=input('1) Change email\n 2) Change password\n 3) Exit \n Select: ')
+            if option == '1':
+                changemail(client,mail)
+            elif option == '2':
+                changepassword(client,mail)
+            elif option == '3':
+                return
+                
+        except Exception as e:
+            print(e)
+
+def changemail(client,email):
+    while 1:
+        print('\nHello',mail,',')
+        password = secure_pass()
+        send(password, client) 
+        if read(client) == 'True Password':
+            newmail = emailREGEX('New Mail: ').lower()
+            send(newmail, client) #1
+            if read(client) == 'already exists': #2
+                print('This mail already exists')
+                continue
+            else:
+                send(newmail,client)
+                return
+        else:
+            print('Wrong password')
+            continue
+    
+
+def changepassword(client,email):
+    while 1:
+        print('\nHello',mail,',')
+        password = secure_pass()
+        send(password, client) 
+        if read(client) == 'True Password':
+            print('\nNew Password')
+            newpassword = secure_pass()
+            send(newpassword, client)
+        else:
+            print('Wrong password')
+            continue
+    
+
+#==============Erase account======================================#
+
+
+#==========================================Signup==========================================================#
 def signup(client):
     while 1:
+        print('\nSignup Health Professional')
         mail = emailREGEX('Mail: ').lower()
         send(mail, client) #1
         if read(client) == 'already exists': #2
-            print('This mail already exists\n')
+            print('This mail already exists')
             continue
         else:
             password=secure_pass()
@@ -96,6 +165,7 @@ def main():
     print(read(client)) #Read People Menu
     while 1:
         try:
+            print('Menu Health Professional')
             opt=input(' 1) Login\n 2) Sign up\n 3) Exit \n Select: ')
             if opt == '1':
                 send(opt,client)
