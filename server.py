@@ -41,7 +41,8 @@ def handle_professional(conn, addr):
         try:
             opt = read(conn, addr)
             if opt == '1':
-                loginverifyprofessional(conn, addr)
+                mail = loginverifyprofessional(conn, addr)
+                onloginprofessional(conn,addr,mail)
             if opt == '2':
                 signupverifyprofessional(conn, addr)
             if opt == '3':
@@ -52,13 +53,14 @@ def handle_professional(conn, addr):
    
     conn.close()
 
+#======================For Login==========================================================#
 def loginverifyprofessional(conn, addr):
    
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
     while 1:
         mail = read(conn, addr) #1
-        cur.execute("SELECT pass FROM profissional_de_saude WHERE email_p=%s",(mail,))
+        cur.execute("SELECT pass FROM profissional_de_saude WHERE email_p=%s and validated=TRUE",(mail,))
         if cur.rowcount == 1:
             send('Mail True',conn) #2
             password = cur.fetchone()[0]
@@ -67,7 +69,7 @@ def loginverifyprofessional(conn, addr):
             if verifypass:
                 send('True', conn) #4
 
-                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE email_p=%s",(mail,))
+                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE email_p=%s and validated=TRUE",(mail,))
                 send(cur.fetchone()[0],conn) #5
                 break
             else:
@@ -79,8 +81,121 @@ def loginverifyprofessional(conn, addr):
     
     connDB.close()
     cur.close()
+    return mail
+
+def onloginprofessional(conn,addr,mail):
+    login = True
+    while login:
+        try:
+            opt = read(conn, addr)
+            if opt == '1':
+                continue
+            if opt == '2':
+                mail = changeprofileprofessional(conn,addr,mail)
+            if opt == '3':
+                eraseaccountprofessional(conn,addr)
+            if opt == '4':
+                login = False      
+
+        except Exception as e:
+            print(e)
     return
 
+def changeprofileprofessional(conn,addr,mail):
+    changeprofile = True
+    while changeprofile:
+        try:
+            opt = read(conn, addr)
+            if opt == '1':
+                mail = changemailprofessional(conn,addr,mail)
+            if opt == '2':
+                changepasswordprofessional(conn,addr,mail)
+            if opt == '3':
+                changenameprofessional(conn,addr,mail)
+            if opt == '4':
+                changeprofile = False      
+
+        except Exception as e:
+            print(e)
+    return mail
+
+def changemailprofessional(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    changeemailprofessional = True
+    while changeemailprofessional:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM profissional_de_saude WHERE email_p=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            while 1:
+                newmail = read(conn, addr)
+                cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s",(newmail,))
+                if cur.rowcount != 0:
+                    send('already exists',conn)
+                    continue
+                else:
+                    cur.execute("Update profissional_de_saude set email_p=%s where email_p=%s",(newmail,mail))
+                    connDB.commit()
+                    send('Mail changed',conn)
+                    changeemailprofessional = False
+                    break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    return newmail
+
+def changepasswordprofessional(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    while 1:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM profissional_de_saude WHERE email_p=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            newpassword=read(conn, addr)
+            cur.execute("Update profissional_de_saude set pass=%s where email_p=%s",(newpassword,mail))
+            connDB.commit()
+            break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    return
+
+def changenameprofessional(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    while 1:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM profissional_de_saude WHERE email_p=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            newname=read(conn, addr)
+            cur.execute("Update profissional_de_saude set nome_p=%s where email_p=%s",(newname,mail))
+            connDB.commit()
+            break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    return 
+#======================For Signup==========================================================#
 def signupverifyprofessional(conn, addr):
     
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
@@ -117,8 +232,6 @@ def handle_manager(conn, addr):
             if opt == '1':
                 loginverifymanager(conn, addr)
             if opt == '2':
-                signupverifymanager(conn, addr)
-            if opt == '3':
                 connected = False      
 
         except Exception as e:
@@ -126,19 +239,25 @@ def handle_manager(conn, addr):
    
     conn.close()
 
+def VerifyPassLogin(cur, passe, email):
+    cur.execute("SELECT * FROM gestor_sistema WHERE pass=crypt(%s,pass) and email_g=%s",
+                (passe, email))
+    if cur.rowcount == 0:
+        return False
+    else:
+        return True
+
 def loginverifymanager(conn, addr):
    
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
     while 1:
         mail = read(conn, addr) #1
-        cur.execute("SELECT pass FROM gestor_sistema WHERE email_g=%s",(mail,))
+        cur.execute("SELECT * FROM gestor_sistema WHERE email_g=%s",(mail,))
         if cur.rowcount == 1:
             send('Mail True',conn) #2
-            password = cur.fetchone()[0]
             password_login = read(conn,addr) #3
-            verifypass=sha256_crypt.verify(password_login, password)
-            if verifypass:
+            if VerifyPassLogin(cur, password_login, mail):
                 send('True', conn) #4
                 break
             else:
@@ -152,31 +271,6 @@ def loginverifymanager(conn, addr):
     cur.close()
     return
 
-def signupverifymanager(conn, addr):
-
-    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
-    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    name=read(conn,addr)
-    while 1:
-        mail = read(conn, addr) #1
-        cur.execute("SELECT email_g FROM gestor_sistema WHERE email_g=%s",(mail,))
-        if cur.rowcount != 0:
-            send('already exists',conn) #2
-            continue
-        else:
-            send('doesnt exist',conn) #2
-            password = read(conn,addr) #3
-            cur.execute("INSERT INTO gestor_sistema(nome_g,email_g, pass) VALUES (%s,%s,%s)",(name,mail,password))
-            connDB.commit()
-            break
-    connDB.close()
-    cur.close()
-    return
-
-
-
-    
 #===========================================================SECURITY OFFICER======================================================#
 
 def handle_security(conn, addr):

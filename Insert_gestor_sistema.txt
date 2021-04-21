@@ -1,0 +1,4 @@
+CREATE EXTENSION pgcrypto;
+
+select * from gestor_sistema;
+insert into gestor_sistema( nome_g, email_g, pass) values('Admin','admin@sns.pt',crypt('123',gen_salt('bf')));

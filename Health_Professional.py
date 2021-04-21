@@ -79,7 +79,7 @@ def login(client):
         mail = emailREGEX('Mail: ').lower()
         send(mail,client) #1
         if read(client) == 'Mail False': #2
-            print('Mail doesnt exist')
+            print('Mail doesnt exist or not validated yet')
             continue
 
         password = secure_pass('Password:')
@@ -99,14 +99,18 @@ def menulogin(client,mail,name):
             print(f'\nHello {name},')
             option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
             if option == '1':
+                send(option,client)
                 continue
             elif option == '2':
+                send(option,client)
                 profile = changeprofile(client,mail,name)
                 mail = profile[0]
                 name = profile[1]
             elif option == '3':
+                send(option,client)
                 eraseaccount(client,mail,name)
             elif option == '4':
+                send(option,client)
                 return
                 
         except Exception as e:
@@ -118,14 +122,18 @@ def changeprofile(client,mail,name):
      while 1:
         try:
             print(f'\nHello {name},')
-            option=input(' 1) Change email\n 2) Change password\n 3) Change name \n Select: ')
+            option=input(' 1) Change email\n 2) Change password\n 3) Change name \n 4) Exit \n Select: ')
             if option == '1':
+                send(option,client)
                 mail = changemail(client,mail,name)
             elif option == '2':
+                send(option,client)
                 changepassword(client,mail,name)
             elif option == '3':
+                send(option,client)
                 name = changename(client,mail,name)
             elif option == '4':
+                send(option,client)
                 return [mail, name]
                 
         except Exception as e:
@@ -137,14 +145,15 @@ def changemail(client,email,name):
         password = secure_pass('Password:')
         send(password, client) 
         if read(client) == 'True Password':
-            newmail = emailREGEX('New Mail: ').lower()
-            send(newmail, client) #1
-            if read(client) == 'already exists': #2
-                print('This mail already exists')
-                continue
-            else:
-                send(newmail,client)
-                return newmail
+            while 1:
+                newmail = emailREGEX('New Mail: ').lower()
+                send(newmail, client) 
+                if read(client) == 'already exists': 
+                    print('This mail already exists')
+                    continue
+                else:
+                    print('Email alterado com sucesso!')
+                    return newmail
         else:
             print('Wrong password')
             continue
@@ -157,7 +166,9 @@ def changepassword(client,email,name):
         send(password, client) 
         if read(client) == 'True Password':
             newpassword = secure_pass('New password:')
-            send(newpassword, client)
+            epchave = sha256_crypt.hash(newpassword)
+            send(epchave, client)
+            print('Password alterada com sucesso!')
             return
         else:
             print('Wrong password')
@@ -177,6 +188,7 @@ def changename(client,email,name):
                 else:
                     newname=AjustContent(newname)
                     send(newname, client)
+                    print('Nome alterado com sucesso!')
                     break
             return newname
         else:

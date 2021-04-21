@@ -73,21 +73,6 @@ def login(client):
         elif flagpass == 'False':
             print('Failed to Login\n')
 
-
-def signup(client):
-    while 1:
-        mail = emailREGEX('Mail: ').lower()
-        send(mail, client) #1
-        if read(client) == 'already exists': #2
-            print('This mail already exists\n')
-            continue
-        else:
-            password=secure_pass()
-            epchave = sha256_crypt.hash(password)
-            send(epchave,client) #3
-            break
-
-
 #==========================================================================================================#
 
 def main():
@@ -96,14 +81,11 @@ def main():
     print(read(client)) #Read People Menu
     while 1:
         try:
-            opt=input(' 1) Login\n 2) Sign up\n 3) Exit \n Select: ')
+            opt=input(' 1) Login\n 2) Exit \n Select: ')
             if opt == '1':
                 send(opt,client)
                 login(client)
-            elif opt == '2':
-                send(opt,client)
-                signup(client)
-            elif opt == '3':
+            if opt == '2':
                 send(opt,client)
                 return
                 
