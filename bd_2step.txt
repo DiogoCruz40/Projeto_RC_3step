@@ -1,8 +1,9 @@
 CREATE TABLE profissional_de_saude (
 	id	 serial,
 	nome_p	 VARCHAR(512) NOT NULL,
-	email_p VARCHAR(512) UNIQUE NOT NULL,
+	email_p	 VARCHAR(512) UNIQUE NOT NULL,
 	pass	 VARCHAR(512) NOT NULL,
+	validated BOOL NOT NULL DEFAULT FALSE,
 	PRIMARY KEY(id)
 );
 
@@ -17,8 +18,9 @@ CREATE TABLE gestor_sistema (
 CREATE TABLE agente_seguranca (
 	id	 serial,
 	nome_a	 VARCHAR(512) NOT NULL,
-	email_a VARCHAR(512) UNIQUE NOT NULL,
+	email_a	 VARCHAR(512) UNIQUE NOT NULL,
 	pass	 VARCHAR(512) NOT NULL,
+	validated BOOL NOT NULL DEFAULT FALSE,
 	PRIMARY KEY(id)
 );
 
@@ -33,5 +35,4 @@ CREATE TABLE ocorrencias (
 );
 
 ALTER TABLE ocorrencias ADD CONSTRAINT ocorrencias_fk1 FOREIGN KEY (profissional_de_saude_id) REFERENCES profissional_de_saude(id);
-
 
