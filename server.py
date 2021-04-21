@@ -244,11 +244,17 @@ def signupverifyprofessional(conn, addr):
             send('already exists',conn) #2
             continue
         else:
-            send('doesnt exist',conn) #2
-            password = read(conn,addr) #3
-            cur.execute("INSERT INTO profissional_de_saude(nome_p,email_p,pass) VALUES (%s,%s,%s)",(name,mail,password))
-            connDB.commit()
-            break
+            cur.execute("SELECT email_a FROM agente_seguranca WHERE email_a=%s",(mail,))
+            if cur.rowcount != 0:
+                send('already exists',conn)
+                continue
+            else:
+                send('doesnt exist',conn) #2
+                password = read(conn,addr) #3
+                cur.execute("INSERT INTO profissional_de_saude(nome_p,email_p,pass) VALUES (%s,%s,%s)",(name,mail,password))
+                connDB.commit()
+                break
+
     connDB.close()
     cur.close()
     return
@@ -523,11 +529,16 @@ def signupverifysecurity(conn, addr):
             send('already exists',conn) #2
             continue
         else:
-            send('doesnt exist',conn) #2
-            password = read(conn,addr) #3
-            cur.execute("INSERT INTO agente_seguranca(nome_a,email_a, pass) VALUES (%s,%s,%s)",(name,mail,password))
-            connDB.commit()
-            break
+            cur.execute("SELECT email_p FROM profissional_de_saude WHERE email_p=%s",(mail,))
+            if cur.rowcount != 0:
+                send('already exists',conn)
+                continue
+            else:
+                send('doesnt exist',conn) #2
+                password = read(conn,addr) #3
+                cur.execute("INSERT INTO agente_seguranca(nome_a,email_a, pass) VALUES (%s,%s,%s)",(name,mail,password))
+                connDB.commit()
+                break
     connDB.close()
     cur.close()
     return
