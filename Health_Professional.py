@@ -32,7 +32,28 @@ def emailREGEX(pergunta):
             return str(email)
         else:
             print("Erro: Insira um email válido")
-    
+
+
+def remove_accents(data):
+    return unicodedata.normalize('NFD', data).encode('ascii', 'ignore').decode("utf-8")
+
+
+def isNotBlank(mystring):
+    if mystring and mystring.strip():  # se nao for null e se tiver algo la dentro a nao ser espacos devolve true
+        return True
+
+    return False
+
+
+def AjustContent(text):  # primeira letra de cada palavra maiuscula
+
+    text = text.strip()
+    separatext = re.split('([.!?,/ ' '] *)', text)
+    final = ''.join([i.capitalize() for i in separatext])
+
+    return final
+
+
 #==========================================================================================================#
 
 def read(client):      
@@ -65,23 +86,26 @@ def login(client):
         send(password, client) #3
         flagpass=read(client) #4
         if  flagpass == 'True':
-            menulogin(client,mail)
+            name=read(client)
+            menulogin(client,mail,name)
             break
         elif flagpass == 'False':
             print('Failed to Login')
 
 
-def menulogin(client,mail):
+def menulogin(client,mail,name):    
     while 1:
         try:
-            print('\nHello',mail,',')
-            option=input('1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
+            print(f'\nHello {name},')
+            option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
             if option == '1':
                 continue
             elif option == '2':
-                changeprofile(client,mail)
+                profile = changeprofile(client,mail,name)
+                mail = profile[0]
+                name = profile[1]
             elif option == '3':
-                eraseaccount(client,mail)
+                eraseaccount(client,mail,name)
             elif option == '4':
                 return
                 
@@ -90,24 +114,26 @@ def menulogin(client,mail):
 
 #==============Change profile====================================#
 
-def changeprofile(client,mail):
+def changeprofile(client,mail,name):
      while 1:
         try:
-            print('\nHello',mail,',')
-            option=input('1) Change email\n 2) Change password\n 3) Exit \n Select: ')
+            print(f'\nHello {name},')
+            option=input(' 1) Change email\n 2) Change password\n 3) Change name \n Select: ')
             if option == '1':
-                changemail(client,mail)
+                mail = changemail(client,mail,name)
             elif option == '2':
-                changepassword(client,mail)
+                changepassword(client,mail,name)
             elif option == '3':
-                return
+                name = changename(client,mail,name)
+            elif option == '4':
+                return [mail, name]
                 
         except Exception as e:
             print(e)
 
-def changemail(client,email):
+def changemail(client,email,name):
     while 1:
-        print('\nHello',mail,',')
+        print(f'\nHello {name},')
         password = secure_pass('Password:')
         send(password, client) 
         if read(client) == 'True Password':
@@ -118,24 +144,45 @@ def changemail(client,email):
                 continue
             else:
                 send(newmail,client)
-                return
+                return newmail
         else:
             print('Wrong password')
             continue
     
 
-def changepassword(client,email):
+def changepassword(client,email,name):
     while 1:
-        print('\nHello',mail,',')
+        print(f'\nHello {name},')
         password = secure_pass('Current Password:')
         send(password, client) 
         if read(client) == 'True Password':
             newpassword = secure_pass('New password:')
             send(newpassword, client)
+            return
         else:
             print('Wrong password')
             continue
-    
+
+def changename(client,email,name):
+    while 1:
+        print(f'\nHello {name},')
+        password = secure_pass('Password:')
+        send(password, client) 
+        if read(client) == 'True Password':
+            while 1:
+                newname = input('New Name: ')
+                if not isNotBlank(newname):
+                    print('Insert a valid name')
+                    continue
+                else:
+                    newname=AjustContent(newname)
+                    send(newname, client)
+                    break
+            return newname
+        else:
+            print('Wrong password')
+            continue
+
 
 #==============Erase account======================================#
 
@@ -144,6 +191,16 @@ def changepassword(client,email):
 def signup(client):
     while 1:
         print('\nSignup Health Professional')
+        name = input('Name: ')
+        if not isNotBlank(name):
+            print('Insert a valid name')
+            continue
+        else:
+            name=AjustContent(name)
+            send(name, client)
+            break
+
+    while 1:
         mail = emailREGEX('Mail: ').lower()
         send(mail, client) #1
         if read(client) == 'already exists': #2
