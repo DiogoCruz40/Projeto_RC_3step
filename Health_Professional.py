@@ -93,8 +93,14 @@ def login(client):
             print('Failed to Login')
 
 
-def menulogin(client,mail,name):    
+def menulogin(client,mail,name):
+
+    delete = False    
     while 1:
+
+        if delete == True:
+            break
+
         try:
             print(f'\nHello {name},')
             option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
@@ -108,7 +114,7 @@ def menulogin(client,mail,name):
                 name = profile[1]
             elif option == '3':
                 send(option,client)
-                eraseaccount(client,mail,name)
+                delete = eraseaccount(client,mail,name)
             elif option == '4':
                 send(option,client)
                 return
@@ -197,7 +203,29 @@ def changename(client,email,name):
 
 
 #==============Erase account======================================#
+def eraseaccount(client,email,name):
+    while 1:
+        print(f'\nHello {name},')
+        password = secure_pass('Password:')
+        send(password, client) 
+        if read(client) == 'True Password':
+            while 1:
+                delete = input('Sure you want to delete account[y/n]?: ').lower()
 
+                if delete == 'y':
+                    send(delete, client)
+                    print('Conta eliminada com sucesso!')
+                    return True
+
+                elif delete == 'n':
+                    send(delete, client)
+                    return False
+
+                else:
+                    continue
+        else:
+            print('Wrong password')
+            continue
 
 #==========================================Signup==========================================================#
 def signup(client):

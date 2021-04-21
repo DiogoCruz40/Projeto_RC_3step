@@ -93,7 +93,9 @@ def onloginprofessional(conn,addr,mail):
             if opt == '2':
                 mail = changeprofileprofessional(conn,addr,mail)
             if opt == '3':
-                eraseaccountprofessional(conn,addr)
+                delete = eraseaccountprofessional(conn,addr,mail)
+                if delete == True:
+                    login = False
             if opt == '4':
                 login = False      
 
@@ -195,6 +197,38 @@ def changenameprofessional(conn,addr,mail):
     connDB.close()
     cur.close()
     return 
+
+def eraseaccountprofessional(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    while 1:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM profissional_de_saude WHERE email_p=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            delete=read(conn, addr)
+            if delete == 'y':
+                cur.execute("DELETE FROM profissional_de_saude where email_p=%s",(mail,))
+                connDB.commit()
+                delete = True
+                break
+            else:
+                delete = False
+                break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+
+    if delete == True:
+        return True
+    else:
+        return False
 #======================For Signup==========================================================#
 def signupverifyprofessional(conn, addr):
     
@@ -273,16 +307,19 @@ def loginverifymanager(conn, addr):
 
 #===========================================================SECURITY OFFICER======================================================#
 
+
+
 def handle_security(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
-    send('Security officer CONNECTED', conn)
+    send('Security Officer CONNECTED', conn)
     while connected:
 
         try:
             opt = read(conn, addr)
             if opt == '1':
-                loginverifysecurity(conn, addr)
+                mail = loginverifysecurity(conn, addr)
+                onloginsecurity(conn,addr,mail)
             if opt == '2':
                 signupverifysecurity(conn, addr)
             if opt == '3':
@@ -293,13 +330,14 @@ def handle_security(conn, addr):
    
     conn.close()
 
+#======================For Login==========================================================#
 def loginverifysecurity(conn, addr):
    
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
     while 1:
         mail = read(conn, addr) #1
-        cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s",(mail,))
+        cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s and validated=TRUE",(mail,))
         if cur.rowcount == 1:
             send('Mail True',conn) #2
             password = cur.fetchone()[0]
@@ -307,6 +345,9 @@ def loginverifysecurity(conn, addr):
             verifypass=sha256_crypt.verify(password_login, password)
             if verifypass:
                 send('True', conn) #4
+
+                cur.execute("SELECT nome_a FROM agente_seguranca WHERE email_a=%s and validated=TRUE",(mail,))
+                send(cur.fetchone()[0],conn) #5
                 break
             else:
                 send('False', conn) #4
@@ -317,7 +358,156 @@ def loginverifysecurity(conn, addr):
     
     connDB.close()
     cur.close()
+    return mail
+
+def onloginsecurity(conn,addr,mail):
+    login = True
+    while login:
+        try:
+            opt = read(conn, addr)
+            if opt == '1':
+                continue
+            if opt == '2':
+                mail = changeprofilesecurity(conn,addr,mail)
+            if opt == '3':
+                delete = eraseaccountsecurity(conn,addr,mail)
+                if delete == True:
+                    login = False
+            if opt == '4':
+                login = False      
+
+        except Exception as e:
+            print(e)
     return
+
+def changeprofilesecurity(conn,addr,mail):
+    changeprofile = True
+    while changeprofile:
+        try:
+            opt = read(conn, addr)
+            if opt == '1':
+                mail = changemailsecurity(conn,addr,mail)
+            if opt == '2':
+                changepasswordsecurity(conn,addr,mail)
+            if opt == '3':
+                changenamesecurity(conn,addr,mail)
+            if opt == '4':
+                changeprofile = False      
+
+        except Exception as e:
+            print(e)
+    return mail
+
+def changemailsecurity(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    changeemailprofessional = True
+    while changeemailprofessional:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            while 1:
+                newmail = read(conn, addr)
+                cur.execute("SELECT * FROM agente_seguranca WHERE email_a=%s",(newmail,))
+                if cur.rowcount != 0:
+                    send('already exists',conn)
+                    continue
+                else:
+                    cur.execute("Update agente_seguranca set email_a=%s where email_a=%s",(newmail,mail))
+                    connDB.commit()
+                    send('Mail changed',conn)
+                    changeemailprofessional = False
+                    break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    return newmail
+
+def changepasswordsecurity(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    while 1:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            newpassword=read(conn, addr)
+            cur.execute("Update agente_seguranca set pass=%s where email_a=%s",(newpassword,mail))
+            connDB.commit()
+            break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    return
+
+def changenamesecurity(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    while 1:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            newname=read(conn, addr)
+            cur.execute("Update agente_seguranca set nome_a=%s where email_a=%s",(newname,mail))
+            connDB.commit()
+            break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    return 
+
+def eraseaccountsecurity(conn,addr,mail):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    while 1:
+        password_login=read(conn,addr)
+        cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s",(mail,))
+        password = cur.fetchone()[0]
+        verifypass=sha256_crypt.verify(password_login, password)
+        if verifypass:
+            send('True Password', conn)
+            delete=read(conn, addr)
+            if delete == 'y':
+                cur.execute("DELETE FROM agente_seguranca where email_a=%s",(mail,))
+                connDB.commit()
+                delete = True
+                break
+            else:
+                delete = False
+                break
+        else:
+            send('False Password', conn) 
+            continue
+       
+    connDB.close()
+    cur.close()
+    
+    if delete == True:
+        return True
+    else:
+        return False
+
+#======================For Signup==========================================================#
 
 def signupverifysecurity(conn, addr):
 
@@ -325,6 +515,7 @@ def signupverifysecurity(conn, addr):
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     name=read(conn,addr)
+
     while 1:
         mail = read(conn, addr) #1
         cur.execute("SELECT email_a FROM agente_seguranca WHERE email_a=%s",(mail,))
