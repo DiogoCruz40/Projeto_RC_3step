@@ -43,9 +43,9 @@ def handle_professional(conn, addr):
             if opt == '1':
                 mail = loginverifyprofessional(conn, addr)
                 onloginprofessional(conn,addr,mail)
-            if opt == '2':
+            elif opt == '2':
                 signupverifyprofessional(conn, addr)
-            if opt == '3':
+            elif opt == '3':
                 connected = False      
 
         except Exception as e:
@@ -90,13 +90,13 @@ def onloginprofessional(conn,addr,mail):
             opt = read(conn, addr)
             if opt == '1':
                 continue
-            if opt == '2':
+            elif opt == '2':
                 mail = changeprofileprofessional(conn,addr,mail)
-            if opt == '3':
+            elif opt == '3':
                 delete = eraseaccountprofessional(conn,addr,mail)
                 if delete == True:
                     login = False
-            if opt == '4':
+            elif opt == '4':
                 login = False      
 
         except Exception as e:
@@ -110,11 +110,11 @@ def changeprofileprofessional(conn,addr,mail):
             opt = read(conn, addr)
             if opt == '1':
                 mail = changemailprofessional(conn,addr,mail)
-            if opt == '2':
+            elif opt == '2':
                 changepasswordprofessional(conn,addr,mail)
-            if opt == '3':
+            elif opt == '3':
                 changenameprofessional(conn,addr,mail)
-            if opt == '4':
+            elif opt == '4':
                 changeprofile = False      
 
         except Exception as e:
@@ -271,7 +271,8 @@ def handle_manager(conn, addr):
             opt = read(conn, addr)
             if opt == '1':
                 loginverifymanager(conn, addr)
-            if opt == '2':
+                onloginmanager(conn, addr)
+            elif opt == '2':
                 connected = False      
 
         except Exception as e:
@@ -313,6 +314,72 @@ def loginverifymanager(conn, addr):
     cur.close()
     return
 
+def onloginmanager(conn,addr):
+    login = True
+    while login:
+        try:
+            opt = read(conn, addr)
+            if opt == '1':
+                validateanaccountmanager(conn,addr)
+            elif opt == '2':
+                deleteanaccountmanager(conn,addr)
+            elif opt == '3':
+                login = False      
+
+        except Exception as e:
+            print(e)
+    return
+
+def validateanaccountmanager(conn,addr):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    while 1:
+        mail = read(conn, addr) #1
+        cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s and validated=FALSE",(mail,))
+        if cur.rowcount != 0:
+            cur.execute("UPDATE profissional_de_saude set validated=TRUE where email_p=%s",(mail,))
+            connDB.commit()
+            send('Mail validated', conn)
+            break
+        else:
+            cur.execute("SELECT * FROM agente_seguranca WHERE email_a=%s and validated=FALSE",(mail,))
+            if cur.rowcount !=0:
+                cur.execute("UPDATE agente_seguranca set validated=TRUE where email_a=%s",(mail,))
+                connDB.commit()
+                send('Mail validated', conn)
+                break
+            else:
+                send('Mail False',conn)
+                continue
+    connDB.close()
+    cur.close()
+    return
+
+
+def deleteanaccountmanager(conn,addr):
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    while 1:
+        mail = read(conn, addr) #1
+        cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s",(mail,))
+        if cur.rowcount != 0:
+            cur.execute("Delete from profissional_de_saude where email_p=%s",(mail,))
+            connDB.commit()
+            send('Mail deleted', conn)
+            break
+        else:
+            cur.execute("SELECT * FROM agente_seguranca WHERE email_a=%s",(mail,))
+            if cur.rowcount !=0:
+                cur.execute("Delete from agente_seguranca where email_a=%s",(mail,))
+                connDB.commit()
+                send('Mail deleted', conn)
+                break
+            else:
+                send('Mail False',conn)
+                continue
+    connDB.close()
+    cur.close()
+    return            
 #===========================================================SECURITY OFFICER======================================================#
 
 
@@ -328,9 +395,9 @@ def handle_security(conn, addr):
             if opt == '1':
                 mail = loginverifysecurity(conn, addr)
                 onloginsecurity(conn,addr,mail)
-            if opt == '2':
+            elif opt == '2':
                 signupverifysecurity(conn, addr)
-            if opt == '3':
+            elif opt == '3':
                 connected = False      
 
         except Exception as e:
@@ -375,13 +442,13 @@ def onloginsecurity(conn,addr,mail):
             opt = read(conn, addr)
             if opt == '1':
                 continue
-            if opt == '2':
+            elif opt == '2':
                 mail = changeprofilesecurity(conn,addr,mail)
-            if opt == '3':
+            elif opt == '3':
                 delete = eraseaccountsecurity(conn,addr,mail)
                 if delete == True:
                     login = False
-            if opt == '4':
+            elif opt == '4':
                 login = False      
 
         except Exception as e:
@@ -395,11 +462,11 @@ def changeprofilesecurity(conn,addr,mail):
             opt = read(conn, addr)
             if opt == '1':
                 mail = changemailsecurity(conn,addr,mail)
-            if opt == '2':
+            elif opt == '2':
                 changepasswordsecurity(conn,addr,mail)
-            if opt == '3':
+            elif opt == '3':
                 changenamesecurity(conn,addr,mail)
-            if opt == '4':
+            elif opt == '4':
                 changeprofile = False      
 
         except Exception as e:
