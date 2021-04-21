@@ -299,6 +299,8 @@ def loginverifymanager(conn, addr):
             password_login = read(conn,addr) #3
             if VerifyPassLogin(cur, password_login, mail):
                 send('True', conn) #4
+                cur.execute("SELECT nome_g FROM gestor_sistema WHERE email_g=%s",(mail,))
+                send(cur.fetchone()[0],conn) #5
                 break
             else:
                 send('False', conn) #4
