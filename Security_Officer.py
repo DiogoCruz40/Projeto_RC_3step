@@ -192,7 +192,9 @@ def occurenceview(client,mail,name):
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
             elif option == '5':
+                send(option, client)
                 break
+        
         except Exception as e:
             print(e)
         break

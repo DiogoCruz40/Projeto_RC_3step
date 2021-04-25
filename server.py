@@ -95,9 +95,7 @@ def onloginprofessional(conn,addr,mail):
             if opt == '1':
                 opt2 = read(conn, addr)
                 if opt2 == '1':
-                    print("estou aqui--5")
                     occurencemenu(conn, addr, mail)
-                    print("estou aqui--6")
                 elif opt2 == '2': 
                     login = True
             elif opt == '2':
@@ -110,8 +108,7 @@ def onloginprofessional(conn,addr,mail):
                 login = False      
 
         except Exception as e:
-            print(e)
-    print("estou aqui--7")        
+            print(e)      
     return
 
 #======================Occurence Register==========================================================#
@@ -124,32 +121,25 @@ def occurencemenu(conn,addr,mail):
             opt = read(conn, addr)
             if opt == '1':
                 date = read(conn,addr)
-                print("date : " + date)
             elif opt == '2':
                 time_string = read(conn,addr)
-                print("time : " + time_string)
             elif opt == '3':
                 local = read(conn,addr)
-                print("local : " + local)
             elif opt == '4':
 
                 opt2 = read(conn,addr)
                 if opt2 == '1':
                     description = read(conn,addr)
-                    print("descrição : " + description)
                 elif opt2 == '2':
-                    print("descrição eliminada")
                     continue 
             elif opt == '5':
                 try:
                     opt2 = read(conn, addr)
                     if opt2 == '1':
                         send('True', conn)
-                        mail = 'anonymous@anonymous.pt'  
-                        print("mail : " + mail)                    
+                        mail = 'anonymous@anonymous.pt'                 
                     elif opt2 == '2':
-                        send('True', conn)
-                        print("mail: " + mail)   
+                        send('True', conn)  
                 except Exception as e:
                     print(e)   
                 try:
@@ -161,24 +151,18 @@ def occurencemenu(conn,addr,mail):
                                 state = occurenceregister(conn,addr,mail,date,time_string,local,description)
                                 if state == True:
                                     occurence = False
-                                    print("mandei para a bd, e agora?")
                                     break
                                 else:
-                                    print("Não mandei para a bd...wait what?")
                                     break
                             else:
-                                occurence = True
-                                print("estou aqui--1")
-                        elif opt2 == '2':
-                            print("estou aqui--2")
+                                occurence = True              
+                        elif opt2 == '2':            
                             continue                 
                     else: 
-                        print("estou aqui--3")
                         continue
                 except Exception as e:
                     print(e)                  
             elif opt == '6':
-                print("estou aqui--4")
                 occurence = False
         except Exception as e:
             print(e)
