@@ -2,6 +2,10 @@ import socket
 import stdiomask
 from passlib.handlers.sha2_crypt import sha256_crypt
 import re
+from os import system
+import time
+from datetime import datetime
+import datetime
 
 HEADER = 64
 PORT = 8100
@@ -9,6 +13,7 @@ FORMAT = 'utf-8'
 DISCONNECT_MSG = '!DISCONNECT'
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
+clear = lambda: system('clear')
 
 def secure_pass(param):
 
@@ -102,10 +107,12 @@ def menulogin(client,mail,name):
             break
 
         try:
+            clear()
             print(f'\nHello {name},')
             option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
             if option == '1':
                 send(option,client)
+                createoccurence(client,mail,name)
                 continue
             elif option == '2':
                 send(option,client)
@@ -127,6 +134,7 @@ def menulogin(client,mail,name):
 def changeprofile(client,mail,name):
      while 1:
         try:
+            clear()
             print(f'\nHello {name},')
             option=input(' 1) Change email\n 2) Change password\n 3) Change name \n 4) Exit \n Select: ')
             if option == '1':
@@ -147,6 +155,7 @@ def changeprofile(client,mail,name):
 
 def changemail(client,email,name):
     while 1:
+        clear()
         print(f'\nHello {name},')
         password = secure_pass('Password:')
         send(password, client) 
@@ -167,6 +176,7 @@ def changemail(client,email,name):
 
 def changepassword(client,email,name):
     while 1:
+        clear()
         print(f'\nHello {name},')
         password = secure_pass('Current Password:')
         send(password, client) 
@@ -182,6 +192,7 @@ def changepassword(client,email,name):
 
 def changename(client,email,name):
     while 1:
+        clear()
         print(f'\nHello {name},')
         password = secure_pass('Password:')
         send(password, client) 
@@ -205,6 +216,7 @@ def changename(client,email,name):
 #==============Erase account======================================#
 def eraseaccount(client,email,name):
     while 1:
+        clear()
         print(f'\nHello {name},')
         password = secure_pass('Password:')
         send(password, client) 
@@ -226,10 +238,159 @@ def eraseaccount(client,email,name):
         else:
             print('Wrong password')
             continue
+#======================================Create an Occurence=================================================#
+
+def createoccurence(client,email,name):
+    while 1:
+        clear()
+        print(f'\nHello {name},')
+        print('\n   >> Registo de Ocorrências \n')
+        opt =input(' 1) Registo \n 2) Exit \n')
+        if opt == '1':
+            send(opt,client)
+            occurenceclient(client, email, name)
+            return
+        elif opt == '2':
+            send(opt,client)
+            return
+
+
+
+def occurenceclient(client,email,name):
+    valid_date = False
+    valid_time = False 
+    valid_local = False 
+    valid_description = False 
+    while 1:
+        try:
+            clear()
+            print(f'\nHello {name},')
+            print('\n   >> Registo de Ocorrências \n')
+            opt = input(' 1) Registo da data \n 2) Registo da hora\n 3) Registo da Localidade\n 4) Descrição da Ocorrência\n 5) Submeter Ocorrência  \n 6) Exit \n')
+            if opt == '1':
+                send(opt,client)
+                date = input("Data (formato: YYYY-MM-DD) :\n ")
+                try:
+                    datetime.datetime.strptime(date, "%Y-%m-%d")             
+                    valid_date = True
+                    send(date,client)
+                    result = input("Data guardada\n Prima qualquer tecla para voltar atrás\n")
+                    continue 
+                except:                    
+                    result = input("O formato da data está errado. Deverá ser YYYY-MM-DD\n Prima qualquer tecla para voltar atrás\n")
+                    send('False',client)
+                    valid_date = False
+                    continue;
+            elif opt == '2':
+                send(opt,client)
+                time_string = input("Hora (formato: HH:MM) :\n ")
+                try:
+                    time.strptime(time_string, '%H:%M')
+                    valid_time = True
+                    send(time_string,client)
+                    result = input("Hora guardada\n Prima qualquer tecla para voltar atrás\n")
+                    continue
+                except:
+                    result = input("O formato da hora está errado. Deverá ser HH:MM\n Prima qualquer tecla para voltar atrás\n")
+                    send('False',client)
+                    valid_time = False         
+                    continue
+            elif opt == '3':
+                send(opt,client) 
+                local = input("Local da ocorrência: \n")
+                result = any(chr.isdigit() for chr in local)
+                if result == True:
+                    result2 = input("A localidade não pode conter números\n Prima qualquer tecla para voltar atrás\n")
+                    send('False',client)
+                    valid_local = False 
+                    continue
+                else:
+                    result2 = input("Localidade guardada\n Prima qualquer tecla para voltar atrás\n")
+                    valid_local = True 
+                    send(local,client)
+                    continue
+            elif opt == '4':
+                send(opt,client)
+                description = input("Faça a descrição da ocorrência com o máximo de detalhes possíveis. Prima \"Enter\" para finalizar a descrição:\n")
+                while 1:
+                    result = input("Pretende manter esta descrição:\n" + description + "\n 1) Sim \n 2) Não\n")
+                    try:
+                        if result == '1':
+                            send(result,client)
+                            result2 = input("Descrição guardada\n Prima qualquer tecla para voltar atrás\n")
+                            valid_description = True
+                            send(description,client)
+                            break
+                        elif result =='2':
+                            send(result,client)
+                            result2 = input("A descrição será eliminada\n Prima qualquer tecla para voltar atrás\n")
+                            valid_description = False
+                            send('False',client)
+                            break
+                    except Exception as e:
+                            print(e)
+            elif opt == '5':
+                send(opt,client)
+                while 1:
+                    result = input("Pretende submeter a ocorrencia em modo anónimo?\n 1) Sim\n 2) Não\n")
+                    try:
+                        if result == '1':
+                            send(result,client)                          
+                            while read(client)!='True':
+                                continue
+                            break
+                        elif result == '2':
+                            send(result,client)
+                            while read(client)!='True':
+                                continue
+                            break
+                    except Exception as e:
+                        print(e)             
+
+                if(valid_date==False or valid_time==False or valid_local==False or valid_description==False): 
+                    send('False',client) 
+                    print(" Ainda tem campos por preencher. Por favor preencha os seguintes campos para submeter a ocorrência:\n")
+                    if valid_date == False:
+                        print("->Data\n")
+                    if valid_time == False:
+                        print("->Hora\n") 
+                    if valid_local == False:
+                        print("->Localidade\n") 
+                    if valid_description == False:
+                        print("->Descrição\n")
+                    result = input(" Prima qualquer teclar para voltar atrás\n")
+                    break
+                else:
+                    send('True',client)
+                    result=0
+                    while result!='1' and result!= '2':
+                        result = input("Pretende fazer submissão do seguinte registo? :\n" + "Data: " + str(date) + "\n" +
+                                    "Hora: " + str(time_string) + "\n" + "Localidade: " + local + "\n" + "Descrição: " + description 
+                                    + "\n 1) Sim \n 2) Não\n")
+                    
+                        if result == '1':
+                            send(result,client)
+                            result1 = input("Submissão feita\n Prima qualquer tecla para sair\n")
+                            send('True', client)
+                                
+                        elif result =='2':
+                            send(result,client)
+                            result1= input("O registo não foi submetido.\n Prima qualquer tecla para voltar atrás\n")
+                break
+
+            elif opt == '6':
+                send(opt,client)
+                continue
+        except Exception as e:
+            print(e)
+
+
 
 #==========================================Signup==========================================================#
 def signup(client):
+    clear()
     while 1:
+        
         print('\nSignup Health Professional')
         name = input('Name: ')
         if not isNotBlank(name):
@@ -252,15 +413,17 @@ def signup(client):
             send(epchave,client) #3
             break
 
-
+   
 #==========================================================================================================#
 
 def main():
+    
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(ADDR)
     print(read(client)) #Read People Menu
     while 1:
         try:
+            clear();
             print('Menu Health Professional')
             opt=input(' 1) Login\n 2) Sign up\n 3) Exit \n Select: ')
             if opt == '1':

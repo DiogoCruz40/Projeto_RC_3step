@@ -1,0 +1,1 @@
+insert into profissional_de_saude( nome_p, email_p, pass, validated) values('anonymous','anonymous@anonymous.pt',crypt('anonymous',gen_salt('bf')),true);
