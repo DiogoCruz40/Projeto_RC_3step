@@ -413,7 +413,8 @@ def handle_manager(conn, addr):
         try:
             opt = read(conn, addr)
             if opt == '1':
-                loginverifymanager(conn, addr)
+                if not loginverifymanager(conn, addr):
+                     continue
                 onloginmanager(conn, addr)
             elif opt == '2':
                 connected = False      
@@ -448,14 +449,24 @@ def loginverifymanager(conn, addr):
                 break
             else:
                 send('False', conn) #4
-                continue
+                if read(conn,addr) == 'Try again Pass True':
+                    continue
+                else:
+                    connDB.close()
+                    cur.close()
+                    return False
         else:
             send('Mail False', conn) #2
-            continue
+            if read(conn,addr) == 'Try again Mail True':
+                continue
+            else:
+                connDB.close()
+                cur.close()
+                return False
     
     connDB.close()
     cur.close()
-    return
+    return True
 
 def onloginmanager(conn,addr):
     login = True
@@ -476,20 +487,31 @@ def onloginmanager(conn,addr):
 def validateanaccountmanager(conn,addr):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
     while 1:
+        cur.execute("Select nome_p,email_p,validated FROM profissional_de_saude where email_p!='anonymous@anonymous.pt'")
+        send(str(cur.fetchall()),conn)
+        cur.execute("Select nome_a,email_a,validated FROM agente_seguranca")
+        send(str(cur.fetchall()),conn)
         mail = read(conn, addr) #1
+        if mail == '0':
+            connDB.close()
+            cur.close()
+            return
         cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s and validated=FALSE",(mail,))
         if cur.rowcount != 0:
-            cur.execute("UPDATE profissional_de_saude set validated=TRUE where email_p=%s",(mail,))
-            connDB.commit()
-            send('Mail validated', conn)
+            send('Mail validate', conn)
+            if read(conn, addr) == 'Mail Confirm True':
+                cur.execute("UPDATE profissional_de_saude set validated=TRUE where email_p=%s",(mail,))
+                connDB.commit()
             break
         else:
             cur.execute("SELECT * FROM agente_seguranca WHERE email_a=%s and validated=FALSE",(mail,))
             if cur.rowcount !=0:
-                cur.execute("UPDATE agente_seguranca set validated=TRUE where email_a=%s",(mail,))
-                connDB.commit()
-                send('Mail validated', conn)
+                send('Mail validate', conn)
+                if read(conn, addr) == 'Mail Confirm True':
+                    cur.execute("UPDATE agente_seguranca set validated=TRUE where email_a=%s",(mail,))
+                    connDB.commit()
                 break
             else:
                 send('Mail False',conn)
@@ -502,20 +524,32 @@ def validateanaccountmanager(conn,addr):
 def deleteanaccountmanager(conn,addr):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
     while 1:
+        cur.execute("Select nome_p,email_p,validated FROM profissional_de_saude where email_p!='anonymous@anonymous.pt'")
+        send(str(cur.fetchall()),conn)
+        cur.execute("Select nome_a,email_a,validated FROM agente_seguranca")
+        send(str(cur.fetchall()),conn)
         mail = read(conn, addr) #1
-        cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s",(mail,))
-        if cur.rowcount != 0:
-            cur.execute("Delete from profissional_de_saude where email_p=%s",(mail,))
-            connDB.commit()
-            send('Mail deleted', conn)
+        if mail == '0':
+            connDB.close()
+            cur.close()
+            return
+        
+        cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s and email_p!='anonymous@anonymous.pt'",(mail,))
+        if cur.rowcount != 0: 
+            send('Mail delete', conn)
+            if read(conn, addr) == 'Mail Confirm True':
+                cur.execute("Delete from profissional_de_saude where email_p=%s",(mail,))
+                connDB.commit()
             break
         else:
             cur.execute("SELECT * FROM agente_seguranca WHERE email_a=%s",(mail,))
             if cur.rowcount !=0:
-                cur.execute("Delete from agente_seguranca where email_a=%s",(mail,))
-                connDB.commit()
-                send('Mail deleted', conn)
+                send('Mail delete', conn)
+                if read(conn, addr) == 'Mail Confirm True':
+                    cur.execute("Delete from agente_seguranca where email_a=%s",(mail,))
+                    connDB.commit()
                 break
             else:
                 send('Mail False',conn)
