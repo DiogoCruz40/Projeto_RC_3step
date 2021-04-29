@@ -28,7 +28,7 @@ CREATE TABLE ocorrencias (
 	id			 serial,
 	data			 DATE NOT NULL,
 	hora			 VARCHAR(512) NOT NULL,
-	localidade		 VARCHAR(512),NOT NULL,
+	localidade		 VARCHAR(512) NOT NULL,
 	descricao		 VARCHAR(512) NOT NULL,
 	profissional_de_saude_id BIGINT NOT NULL,
 	PRIMARY KEY(id)

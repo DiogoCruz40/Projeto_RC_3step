@@ -46,6 +46,8 @@ def handle_professional(conn, addr):
             opt = read(conn, addr)
             if opt == '1':
                 mail = loginverifyprofessional(conn, addr)
+                if mail == 'notlogin':
+                    continue
                 onloginprofessional(conn,addr,mail)
             elif opt == '2':
                 signupverifyprofessional(conn, addr)
@@ -78,10 +80,20 @@ def loginverifyprofessional(conn, addr):
                 break
             else:
                 send('False', conn) #4
-                continue
+                if read(conn,addr) == 'Try again Pass True':
+                    continue
+                else:
+                    connDB.close()
+                    cur.close()
+                    return 'notlogin'
         else:
             send('Mail False', conn) #2
-            continue
+            if read(conn,addr) == 'Try again Mail True':
+                continue
+            else:
+                connDB.close()
+                cur.close()
+                return 'notlogin'
     
     connDB.close()
     cur.close()
@@ -224,17 +236,32 @@ def changemailprofessional(conn,addr,mail):
                 cur.execute("SELECT * FROM profissional_de_saude WHERE email_p=%s",(newmail,))
                 if cur.rowcount != 0:
                     send('already exists',conn)
-                    continue
+                    if read(conn, addr) == 'Try again Mail True':
+                        continue
+                    else:
+                        connDB.close()
+                        cur.close()
+                        return mail
                 else:
-                    cur.execute("Update profissional_de_saude set email_p=%s where email_p=%s",(newmail,mail))
-                    connDB.commit()
-                    send('Mail changed',conn)
-                    changeemailprofessional = False
-                    break
+                    send('Mail Change',conn)
+                    if read(conn, addr) == 'Mail Change True':
+                        cur.execute("Update profissional_de_saude set email_p=%s where email_p=%s",(newmail,mail))
+                        connDB.commit()
+                        changeemailprofessional = False
+                        break
+                    else:
+                        connDB.close()
+                        cur.close()
+                        return mail
         else:
-            send('False Password', conn) 
-            continue
-       
+            send('False Password', conn)
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                connDB.close()
+                cur.close()
+                return mail
+    
     connDB.close()
     cur.close()
     return newmail
@@ -251,13 +278,17 @@ def changepasswordprofessional(conn,addr,mail):
         if verifypass:
             send('True Password', conn)
             newpassword=read(conn, addr)
-            cur.execute("Update profissional_de_saude set pass=%s where email_p=%s",(newpassword,mail))
-            connDB.commit()
+            if read(conn, addr) == 'Pass Change True':
+                cur.execute("Update profissional_de_saude set pass=%s where email_p=%s",(newpassword,mail))
+                connDB.commit()
             break
         else:
-            send('False Password', conn) 
-            continue
-       
+            send('False Password', conn)
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                break
+            
     connDB.close()
     cur.close()
     return
@@ -274,13 +305,17 @@ def changenameprofessional(conn,addr,mail):
         if verifypass:
             send('True Password', conn)
             newname=read(conn, addr)
-            cur.execute("Update profissional_de_saude set nome_p=%s where email_p=%s",(newname,mail))
-            connDB.commit()
+            if read(conn, addr) == 'Name Change True':
+                cur.execute("Update profissional_de_saude set nome_p=%s where email_p=%s",(newname,mail))
+                connDB.commit()
             break
         else:
-            send('False Password', conn) 
-            continue
-       
+            send('False Password', conn)
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                break
+
     connDB.close()
     cur.close()
     return 
@@ -288,6 +323,7 @@ def changenameprofessional(conn,addr,mail):
 def eraseaccountprofessional(conn,addr,mail):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    delete = False
 
     while 1:
         password_login=read(conn,addr)
@@ -296,18 +332,23 @@ def eraseaccountprofessional(conn,addr,mail):
         verifypass=sha256_crypt.verify(password_login, password)
         if verifypass:
             send('True Password', conn)
-            delete=read(conn, addr)
-            if delete == 'y':
+            deleteconfirm=read(conn, addr)
+            if deleteconfirm == 'y':
+                cur.execute('SELECT id FROM profissional_de_saude where email_p=%s',(mail,))
+                id_profissional = cur.fetchone()[0]
+                cur.execute("DELETE FROM ocorrencias where profissional_de_saude_id=%s",(id_profissional,))
+                connDB.commit()
                 cur.execute("DELETE FROM profissional_de_saude where email_p=%s",(mail,))
                 connDB.commit()
                 delete = True
-                break
-            else:
-                delete = False
-                break
+            break
+                
         else:
             send('False Password', conn) 
-            continue
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                break
        
     connDB.close()
     cur.close()
@@ -329,18 +370,33 @@ def signupverifyprofessional(conn, addr):
         cur.execute("SELECT email_p FROM profissional_de_saude WHERE email_p=%s",(mail,))
         if cur.rowcount != 0:
             send('already exists',conn) #2
-            continue
+            if read(conn, addr) == 'Try again Mail True':
+                continue
+            else:
+                break
         else:
             cur.execute("SELECT email_a FROM agente_seguranca WHERE email_a=%s",(mail,))
             if cur.rowcount != 0:
                 send('already exists',conn)
-                continue
+                if read(conn, addr) == 'Try again Mail True':
+                    continue
+                else:
+                    break
             else:
-                send('doesnt exist',conn) #2
-                password = read(conn,addr) #3
-                cur.execute("INSERT INTO profissional_de_saude(nome_p,email_p,pass) VALUES (%s,%s,%s)",(name,mail,password))
-                connDB.commit()
-                break
+                cur.execute("Select email_g FROM gestor_sistema WHERE email_g=%s",(mail,))
+                if cur.rowcount != 0:
+                    send('already exists',conn)
+                    if read(conn, addr) == 'Try again Mail True':
+                        continue
+                    else:
+                        break
+                else:
+                    send('doesnt exist',conn) #2
+                    password = read(conn,addr) #3
+                    if read(conn,addr) == 'Confirm True':
+                        cur.execute("INSERT INTO profissional_de_saude(nome_p,email_p,pass) VALUES (%s,%s,%s)",(name,mail,password))
+                        connDB.commit()
+                    break
 
     connDB.close()
     cur.close()
@@ -470,7 +526,6 @@ def deleteanaccountmanager(conn,addr):
 #===========================================================SECURITY OFFICER======================================================#
 
 
-
 def handle_security(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
@@ -594,7 +649,6 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                 if re.search(client_location.lower(), localidade.lower()):
                     count = count + 1
             nrofoccurences = count
-            print("estou aqui e deram " + str(count) + "resultados \n")
     
         elif id_cl == True:
             client_id = read(conn, addr)
@@ -604,7 +658,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
         nrofoccurences=str(nrofoccurences)
         send(nrofoccurences, conn)   #1
         read(conn, addr)    #2
-        print("estou aqui 2 \n")
+       
 
     except Exception as e:
         print(e)
@@ -613,7 +667,6 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
         return
     
     else:
-        print("estou aqui 3 \n")
         send('TitleStart', conn)   #3
         while read(conn, addr) != 'Ready': #4
             continue
@@ -625,7 +678,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
         while read(conn, addr) != 'Ready':   #8
             continue
         send('Start', conn)   #9
-        print("estou aqui 4 \n")
+    
         if word == True:    
             cur.execute("SELECT * FROM ocorrencias")
             for row in cur.fetchall():
@@ -660,8 +713,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                     read(conn, addr)
             send('True', conn)
 
-        if location == True:  
-            print("estou aqui 5 \n")  
+        if location == True:   
             cur.execute("SELECT * FROM ocorrencias")
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
@@ -738,8 +790,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                 read(conn, addr)
                 send('Stop', conn)
                 read(conn, addr)
-            send('True', conn)
-    print("estou aqui 6 \n")   
+            send('True', conn)  
 
 def changeprofilesecurity(conn,addr,mail):
     changeprofile = True
@@ -889,11 +940,16 @@ def signupverifysecurity(conn, addr):
                 send('already exists',conn)
                 continue
             else:
-                send('doesnt exist',conn) #2
-                password = read(conn,addr) #3
-                cur.execute("INSERT INTO agente_seguranca(nome_a,email_a, pass) VALUES (%s,%s,%s)",(name,mail,password))
-                connDB.commit()
-                break
+                cur.execute("Select email_g FROM gestor_sistema WHERE email_g=%s",(mail,))
+                if cur.rowcount != 0:
+                    send('already exists',conn)
+                    continue
+                else:
+                    send('doesnt exist',conn) #2
+                    password = read(conn,addr) #3
+                    cur.execute("INSERT INTO agente_seguranca(nome_a,email_a, pass) VALUES (%s,%s,%s)",(name,mail,password))
+                    connDB.commit()
+                    break
     connDB.close()
     cur.close()
     return

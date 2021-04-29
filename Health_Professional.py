@@ -81,11 +81,22 @@ def send(msg, client):
 
 def login(client):
     while 1:
-        print('\nLogin Health Professional')
+        clear()
+        print('Login Health Professional')
         mail = emailREGEX('Mail: ').lower()
         send(mail,client) #1
         if read(client) == 'Mail False': #2
             print('Mail doesnt exist or not validated yet')
+            while 1:
+                optionlogin = input('Do you like to try again[y/n]?:').lower()
+                if optionlogin == 'y':
+                    send('Try again Mail True',client)
+                    break
+                elif optionlogin == 'n':
+                    send('Try again Mail False',client)
+                    return
+                else:
+                    continue
             continue
 
         password = secure_pass('Password:')
@@ -96,7 +107,18 @@ def login(client):
             menulogin(client,mail,name)
             break
         elif flagpass == 'False':
-            print('Failed to Login')
+            print('Wrong Password')
+            while 1:
+                optionlogin = input('Do you like to try again[y/n]?:').lower()
+                if optionlogin == 'y':
+                    send('Try again Pass True',client)
+                    break
+                elif optionlogin == 'n':
+                    send('Try again Pass False',client)
+                    return
+                else:
+                    continue
+            continue
 
 
 def menulogin(client,mail,name):
@@ -109,7 +131,7 @@ def menulogin(client,mail,name):
 
         try:
             clear()
-            print(f'\nHello {name},')
+            print(f'Hello {name},')
             option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
             if option == '1':
                 send(option,client)
@@ -136,7 +158,8 @@ def changeprofile(client,mail,name):
      while 1:
         try:
             clear()
-            print(f'\nHello {name},')
+            print(f'Hello {name},')
+            print('\nProfile')
             option=input(' 1) Change email\n 2) Change password\n 3) Change name \n 4) Exit \n Select: ')
             if option == '1':
                 send(option,client)
@@ -157,7 +180,8 @@ def changeprofile(client,mail,name):
 def changemail(client,email,name):
     while 1:
         clear()
-        print(f'\nHello {name},')
+        print(f'Hello {name},')
+        print('Mail change')
         password = secure_pass('Password:')
         send(password, client) 
         if read(client) == 'True Password':
@@ -166,35 +190,88 @@ def changemail(client,email,name):
                 send(newmail, client) 
                 if read(client) == 'already exists': 
                     print('This mail already exists')
+                    while 1:
+                        optmail=input('Sure you want to try again[y/n]?:').lower()
+                        if optmail == 'y':
+                            send('Try again Mail True',client)
+                            break
+                        elif optmail == 'n':
+                            send('Try again Mail False',client)
+                            return email
+                        else:
+                            continue
                     continue
                 else:
-                    print('Email alterado com sucesso!')
-                    return newmail
+                    while 1:
+                        optmailconfirm=input('Do you confirm mail change[y/n]?:').lower()
+                        if optmailconfirm == 'y':
+                            send('Mail Change True',client)
+                            print('Email alterado com sucesso!')
+                            input('Pressiona qualquer tecla para continuar...')
+                            return newmail
+                        elif optmailconfirm == 'n':
+                            send('Mail Change False',client)
+                            return email
+                        else:
+                            continue
+                    
         else:
             print('Wrong password')
+            while 1:
+                optpass=input('Sure you want to try again[y/n]?:').lower()
+                if optpass == 'y':
+                    send('Try again Pass True',client)
+                    break
+                elif optpass == 'n':
+                    send('Try again Pass False',client)
+                    return email
+                else:
+                    continue
             continue
     
 
 def changepassword(client,email,name):
     while 1:
         clear()
-        print(f'\nHello {name},')
+        print(f'Hello {name},')
+        print('Password change')
         password = secure_pass('Current Password:')
         send(password, client) 
         if read(client) == 'True Password':
             newpassword = secure_pass('New password:')
             epchave = sha256_crypt.hash(newpassword)
             send(epchave, client)
-            print('Password alterada com sucesso!')
-            return
+            while 1:
+                optpassconfirm =input('Do you confirm pass change[y/n]?:').lower()
+                if optpassconfirm == 'y':
+                    send('Pass Change True',client)
+                    print('Password alterada com sucesso!')
+                    input('Pressiona qualquer tecla para continuar...')
+                    return 
+                elif optpassconfirm == 'n':
+                    send('Pass Change False',client)
+                    return
+                else:
+                    continue
         else:
             print('Wrong password')
+            while 1:
+                optpass=input('Sure you want to try again[y/n]?:').lower()
+                if optpass == 'y':
+                    send('Try again Pass True',client)
+                    break
+                elif optpass == 'n':
+                    send('Try again Pass False',client)
+                    return 
+                else:
+                    continue
             continue
 
 def changename(client,email,name):
     while 1:
         clear()
-        print(f'\nHello {name},')
+        print(f'Hello {name},')
+        print('Name change')
         password = secure_pass('Password:')
         send(password, client) 
         if read(client) == 'True Password':
@@ -206,11 +283,31 @@ def changename(client,email,name):
                 else:
                     newname=AjustContent(newname)
                     send(newname, client)
-                    print('Nome alterado com sucesso!')
-                    break
-            return newname
+                    while 1:
+                        optname=input('Do you confirm name change[y/n]?:').lower()
+                        if optname == 'y':
+                            send('Name Change True',client)
+                            print('Nome alterado com sucesso!')
+                            input('Pressiona qualquer tecla para continuar...')
+                            return newname
+                        elif optname == 'n':
+                            send('Name Change False',client)
+                            return name
+                        else:
+                            continue
+                   
         else:
             print('Wrong password')
+            while 1:
+                optpass=input('Sure you want to try again[y/n]?:').lower()
+                if optpass == 'y':
+                    send('Try again Pass True',client)
+                    break
+                elif optpass == 'n':
+                    send('Try again Pass False',client)
+                    return name
+                else:
+                    continue
             continue
 
 
@@ -218,16 +315,18 @@ def changename(client,email,name):
 def eraseaccount(client,email,name):
     while 1:
         clear()
-        print(f'\nHello {name},')
+        print(f'Hello {name},')
+        print('Account Erase')
         password = secure_pass('Password:')
         send(password, client) 
         if read(client) == 'True Password':
             while 1:
-                delete = input('Sure you want to delete account[y/n]?: ').lower()
+                delete = input('Sure you want to delete the account[y/n]?: ').lower()
 
                 if delete == 'y':
                     send(delete, client)
                     print('Conta eliminada com sucesso!')
+                    input('Pressiona qualquer tecla para continuar...')
                     return True
 
                 elif delete == 'n':
@@ -238,19 +337,28 @@ def eraseaccount(client,email,name):
                     continue
         else:
             print('Wrong password')
+            while 1:
+                optpass=input('Sure you want to try again[y/n]?:').lower()
+                if optpass == 'y':
+                    send('Try again Pass True',client)
+                    break
+                elif optpass == 'n':
+                    send('Try again Pass False',client)
+                    return name
+                else:
+                    continue
             continue
 #======================================Create an Occurence=================================================#
 
 def createoccurence(client,email,name):
     while 1:
         clear()
-        print(f'\nHello {name},')
+        print(f'Hello {name},')
         print('\n   >> Registo de Ocorrências \n')
         opt =input(' 1) Registo \n 2) Exit \n')
         if opt == '1':
             send(opt,client)
             occurenceclient(client, email, name)
-            #continue
             return
         elif opt == '2':
             send(opt,client)
@@ -265,7 +373,7 @@ def occurenceclient(client,email,name):
     while 1:
         try:
             clear()
-            print(f'\nHello {name},')
+            print(f'Hello {name},')
             print('\n   >> Registo de Ocorrências \n')
             opt = input(' 1) Registo da data \n 2) Registo da hora\n 3) Registo da Localidade\n 4) Descrição da Ocorrência\n 5) Submeter Ocorrência  \n 6) Exit \n')
             if opt == '1':
@@ -391,10 +499,10 @@ def occurenceclient(client,email,name):
 
 #==========================================Signup==========================================================#
 def signup(client):
-    clear()
+    
     while 1:
-        
-        print('\nSignup Health Professional')
+        clear()
+        print('Signup Health Professional')
         name = input('Name: ')
         if not isNotBlank(name):
             print('Insert a valid name')
@@ -405,15 +513,44 @@ def signup(client):
             break
 
     while 1:
+        clear()
+        print('Signup Health Professional')
+        print(f'Name:{name}')
         mail = emailREGEX('Mail: ').lower()
         send(mail, client) #1
         if read(client) == 'already exists': #2
             print('This mail already exists')
+            while 1:
+                optmail=input('Sure you want to try again[y/n]?:').lower()
+                if optmail == 'y':
+                    send('Try again Mail True',client) #1
+                    break
+                elif optmail == 'n':
+                    send('Try again Mail False',client) #1
+                    return
+                else:
+                    continue
             continue
         else:
+            clear()
+            print('Signup Health Professional')
+            print(f'Name:{name}')
+            print(f'Mail:{mail}')
             password = secure_pass('Password:')
             epchave = sha256_crypt.hash(password)
             send(epchave,client) #3
+            while 1:
+                optionsignin = input('Confirma o registo da conta[y/n]?:').lower()
+                if optionsignin == 'y':
+                    send('Confirm True',client)
+                    print('Conta criada com sucesso')
+                    input('Pressione qualquer tecla para continuar...')
+                    break
+                elif optionsignin == 'n':
+                    send('Confirm False',client)
+                    break
+                else:
+                    continue
             break
 
    
