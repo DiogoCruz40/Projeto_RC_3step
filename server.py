@@ -536,6 +536,8 @@ def handle_security(conn, addr):
             opt = read(conn, addr)
             if opt == '1':
                 mail = loginverifysecurity(conn, addr)
+                if mail == 'notlogin':
+                    continue
                 onloginsecurity(conn,addr,mail)
             elif opt == '2':
                 signupverifysecurity(conn, addr)
@@ -568,10 +570,20 @@ def loginverifysecurity(conn, addr):
                 break
             else:
                 send('False', conn) #4
-                continue
+                if read(conn,addr) == 'Try again Pass True':
+                    continue
+                else:
+                    connDB.close()
+                    cur.close()
+                    return 'notlogin'
         else:
             send('Mail False', conn) #2
-            continue
+            if read(conn,addr) == 'Try again Mail True':
+                continue
+            else:
+                connDB.close()
+                cur.close()
+                return 'notlogin'
     
     connDB.close()
     cur.close()
@@ -813,8 +825,8 @@ def changeprofilesecurity(conn,addr,mail):
 def changemailsecurity(conn,addr,mail):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    changeemailprofessional = True
-    while changeemailprofessional:
+    changeemailsecurity = True
+    while changeemailsecurity:
         password_login=read(conn,addr)
         cur.execute("SELECT pass FROM agente_seguranca WHERE email_a=%s",(mail,))
         password = cur.fetchone()[0]
@@ -826,17 +838,32 @@ def changemailsecurity(conn,addr,mail):
                 cur.execute("SELECT * FROM agente_seguranca WHERE email_a=%s",(newmail,))
                 if cur.rowcount != 0:
                     send('already exists',conn)
-                    continue
+                    if read(conn, addr) == 'Try again Mail True':
+                        continue
+                    else:
+                        connDB.close()
+                        cur.close()
+                        return mail
                 else:
-                    cur.execute("Update agente_seguranca set email_a=%s where email_a=%s",(newmail,mail))
-                    connDB.commit()
-                    send('Mail changed',conn)
-                    changeemailprofessional = False
-                    break
+                    send('Mail Change',conn)
+                    if read(conn, addr) == 'Mail Change True':
+                        cur.execute("Update agente_seguranca set email_a=%s where email_a=%s",(newmail,mail))
+                        connDB.commit()
+                        changeemailsecurity = False
+                        break
+                    else:
+                        connDB.close()
+                        cur.close()
+                        return mail
         else:
-            send('False Password', conn) 
-            continue
-       
+            send('False Password', conn)
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                connDB.close()
+                cur.close()
+                return mail
+    
     connDB.close()
     cur.close()
     return newmail
@@ -853,13 +880,17 @@ def changepasswordsecurity(conn,addr,mail):
         if verifypass:
             send('True Password', conn)
             newpassword=read(conn, addr)
-            cur.execute("Update agente_seguranca set pass=%s where email_a=%s",(newpassword,mail))
-            connDB.commit()
+            if read(conn, addr) == 'Pass Change True':
+                cur.execute("Update agente_seguranca set pass=%s where email_a=%s",(newpassword,mail))
+                connDB.commit()
             break
         else:
-            send('False Password', conn) 
-            continue
-       
+            send('False Password', conn)
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                break
+            
     connDB.close()
     cur.close()
     return
@@ -876,13 +907,17 @@ def changenamesecurity(conn,addr,mail):
         if verifypass:
             send('True Password', conn)
             newname=read(conn, addr)
-            cur.execute("Update agente_seguranca set nome_a=%s where email_a=%s",(newname,mail))
-            connDB.commit()
+            if read(conn, addr) == 'Name Change True':
+                cur.execute("Update agente_seguranca set nome_a=%s where email_a=%s",(newname,mail))
+                connDB.commit()
             break
         else:
-            send('False Password', conn) 
-            continue
-       
+            send('False Password', conn)
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                break
+
     connDB.close()
     cur.close()
     return 
@@ -890,6 +925,7 @@ def changenamesecurity(conn,addr,mail):
 def eraseaccountsecurity(conn,addr,mail):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    delete = False
 
     while 1:
         password_login=read(conn,addr)
@@ -898,31 +934,32 @@ def eraseaccountsecurity(conn,addr,mail):
         verifypass=sha256_crypt.verify(password_login, password)
         if verifypass:
             send('True Password', conn)
-            delete=read(conn, addr)
-            if delete == 'y':
+            deleteconfirm=read(conn, addr)
+            if deleteconfirm == 'y':
                 cur.execute("DELETE FROM agente_seguranca where email_a=%s",(mail,))
                 connDB.commit()
                 delete = True
-                break
-            else:
-                delete = False
-                break
+            break
+                
         else:
             send('False Password', conn) 
-            continue
+            if read(conn, addr) == 'Try again Pass True':
+                continue
+            else:
+                break
        
     connDB.close()
     cur.close()
-    
+
     if delete == True:
         return True
     else:
-        return False
+        return False      
 
 #======================For Signup==========================================================#
 
 def signupverifysecurity(conn, addr):
-
+    
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -933,23 +970,34 @@ def signupverifysecurity(conn, addr):
         cur.execute("SELECT email_a FROM agente_seguranca WHERE email_a=%s",(mail,))
         if cur.rowcount != 0:
             send('already exists',conn) #2
-            continue
+            if read(conn, addr) == 'Try again Mail True':
+                continue
+            else:
+                break
         else:
             cur.execute("SELECT email_p FROM profissional_de_saude WHERE email_p=%s",(mail,))
             if cur.rowcount != 0:
                 send('already exists',conn)
-                continue
+                if read(conn, addr) == 'Try again Mail True':
+                    continue
+                else:
+                    break
             else:
                 cur.execute("Select email_g FROM gestor_sistema WHERE email_g=%s",(mail,))
                 if cur.rowcount != 0:
                     send('already exists',conn)
-                    continue
+                    if read(conn, addr) == 'Try again Mail True':
+                        continue
+                    else:
+                        break
                 else:
                     send('doesnt exist',conn) #2
                     password = read(conn,addr) #3
-                    cur.execute("INSERT INTO agente_seguranca(nome_a,email_a, pass) VALUES (%s,%s,%s)",(name,mail,password))
-                    connDB.commit()
+                    if read(conn,addr) == 'Confirm True':
+                        cur.execute("INSERT INTO agente_seguranca(nome_a,email_a, pass) VALUES (%s,%s,%s)",(name,mail,password))
+                        connDB.commit()
                     break
+
     connDB.close()
     cur.close()
     return

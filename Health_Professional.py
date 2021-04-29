@@ -136,7 +136,6 @@ def menulogin(client,mail,name):
             if option == '1':
                 send(option,client)
                 createoccurence(client,mail,name)
-                continue
             elif option == '2':
                 send(option,client)
                 profile = changeprofile(client,mail,name)
