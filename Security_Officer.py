@@ -137,6 +137,7 @@ def menulogin(client,mail,name):
                 
         except Exception as e:
             print(e)
+            
 
 
 #==============Consult Occurence====================================#
@@ -154,6 +155,8 @@ def occurenceview(client,mail,name):
                 word = wordsREGEX(" Qual a palavra para pesquisar?\n >>")
                 send(word, client)
                 clear()
+                print(f'\nHello {name},')
+                print('\n   >> Consulta de Ocorrências por ' + word + ' na descrição \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
             elif option == '2':
@@ -168,6 +171,8 @@ def occurenceview(client,mail,name):
                         result = input("O formato da data está errado. Deverá ser YYYY-MM-DD\n Prima qualquer tecla para voltar a inserir\n")
                         continue;
                 clear()
+                print(f'\nHello {name},')
+                print('\n   >> Consulta de Ocorrências pela data ' + date + ' \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
             elif option == '3':
@@ -175,6 +180,8 @@ def occurenceview(client,mail,name):
                 word = wordsREGEX(" Qual a localidade para pesquisar?\n >>")
                 send(word, client)
                 clear()
+                print(f'\nHello {name},')
+                print('\n   >> Consulta de Ocorrências pela localidade ' + word + ' \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
             elif option == '4':
@@ -189,6 +196,8 @@ def occurenceview(client,mail,name):
                         result = input("Introduza um numero válido\n Prima qualquer tecla para voltar a inserir\n")
                         continue;
                 clear()
+                print(f'\nHello {name},')
+                print('\n   >> Consulta de Ocorrências por utilizador com ID ' + str(id_cl) + ' \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
             elif option == '5':
@@ -203,11 +212,12 @@ def printall(client, mail, name):
     endofdata = 'False'
     tableelements=[]
     while 1:
-        nrofoccurences = read(client)   #2
-        send('testing', client)  #3
+        nrofoccurences = read(client)   #1
+        send('testing', client)  #2
         nrofoccurences = int(nrofoccurences)
         if(nrofoccurences == 0):
             print("Não tem ocorrencias disponíveis para visualização de momento\n")
+            break
         else:
             try:
                 #Creation of table by parts
@@ -215,9 +225,9 @@ def printall(client, mail, name):
                 tittle = gettabletittle(client, mail, name)
                 table = PrettyTable() 
                 table.field_names = tittle  
-                send('Ready', client)    #5
+                send('Ready', client)    #8
                 element = 0
-                while read(client) != 'Start':  #6
+                while read(client) != 'Start':  #9
                     continue
                 while nrofoccurences>0:
                     while element != 'Stop':
@@ -243,17 +253,17 @@ def printall(client, mail, name):
 def gettabletittle(client, mail, name):
     try:
         tittleelements=[]
-        while read(client)!= 'TitleStart':   #4
+        while read(client)!= 'TitleStart':   #3
             continue
-        send('Ready', client)    #5
+        send('Ready', client)    #4
         element = 0
         while element!= 'Stop': 
-            element = read(client)
+            element = read(client)  #5    #7
             if element == 'Stop':
                 continue
             else:
-                tittleelements.append(element)  #6
-            send('next', client)    #7
+                tittleelements.append(element)  
+            send('next', client)    #6
            
     except Exception as e:
                 print(e)

@@ -6,6 +6,7 @@ from os import system
 import time
 from datetime import datetime
 import datetime
+from dateutil.relativedelta import relativedelta
 
 HEADER = 64
 PORT = 8100
@@ -249,11 +250,11 @@ def createoccurence(client,email,name):
         if opt == '1':
             send(opt,client)
             occurenceclient(client, email, name)
+            #continue
             return
         elif opt == '2':
             send(opt,client)
-            return
-
+            break
 
 
 def occurenceclient(client,email,name):
@@ -269,15 +270,20 @@ def occurenceclient(client,email,name):
             opt = input(' 1) Registo da data \n 2) Registo da hora\n 3) Registo da Localidade\n 4) Descrição da Ocorrência\n 5) Submeter Ocorrência  \n 6) Exit \n')
             if opt == '1':
                 send(opt,client)
-                date = input("Data (formato: YYYY-MM-DD) :\n ")
+                input_date = input("Data (formato: YYYY-MM-DD) :\n ")
                 try:
-                    datetime.datetime.strptime(date, "%Y-%m-%d")             
+                    date2 = datetime.datetime.strptime(input_date, "%Y-%m-%d")             
+                    current_date = datetime.datetime.now()
+                    diff = relativedelta(current_date, date2).years
+                    if diff>100 or date2>current_date:
+                        raise ValueError()
                     valid_date = True
-                    send(date,client)
+                    send(input_date,client)
                     result = input("Data guardada\n Prima qualquer tecla para voltar atrás\n")
                     continue 
+                
                 except:                    
-                    result = input("O formato da data está errado. Deverá ser YYYY-MM-DD\n Prima qualquer tecla para voltar atrás\n")
+                    result = input("O formato da data está errado. Deverá ser YYYY-MM-DD e o ano dado deverá ser válido\n Prima qualquer tecla para voltar atrás\n")
                     send('False',client)
                     valid_date = False
                     continue;
@@ -314,38 +320,36 @@ def occurenceclient(client,email,name):
                 description = input("Faça a descrição da ocorrência com o máximo de detalhes possíveis. Prima \"Enter\" para finalizar a descrição:\n")
                 while 1:
                     result = input("Pretende manter esta descrição:\n" + description + "\n 1) Sim \n 2) Não\n")
-                    try:
-                        if result == '1':
-                            send(result,client)
-                            result2 = input("Descrição guardada\n Prima qualquer tecla para voltar atrás\n")
-                            valid_description = True
-                            send(description,client)
-                            break
-                        elif result =='2':
-                            send(result,client)
-                            result2 = input("A descrição será eliminada\n Prima qualquer tecla para voltar atrás\n")
-                            valid_description = False
-                            send('False',client)
-                            break
-                    except Exception as e:
-                            print(e)
+                    if result == '1':
+                        send(result,client)
+                        result2 = input("Descrição guardada\n Prima qualquer tecla para voltar atrás\n")
+                        valid_description = True
+                        send(description,client)
+                        break
+                    elif result =='2':
+                        send(result,client)
+                        result2 = input("A descrição será eliminada\n Prima qualquer tecla para voltar atrás\n")
+                        valid_description = False
+                        send('False',client)
+                        break
+                    
             elif opt == '5':
                 send(opt,client)
                 while 1:
                     result = input("Pretende submeter a ocorrencia em modo anónimo?\n 1) Sim\n 2) Não\n")
-                    try:
-                        if result == '1':
-                            send(result,client)                          
-                            while read(client)!='True':
-                                continue
-                            break
-                        elif result == '2':
-                            send(result,client)
-                            while read(client)!='True':
-                                continue
-                            break
-                    except Exception as e:
-                        print(e)             
+                    
+                    if result == '1':
+                        send(result,client)                          
+                        while read(client)!='True':
+                            continue
+                        break
+                    elif result == '2':
+                        send(result,client)
+                        while read(client)!='True':
+                            continue
+                        break   
+                    else: 
+                        continue   
 
                 if(valid_date==False or valid_time==False or valid_local==False or valid_description==False): 
                     send('False',client) 
@@ -359,31 +363,30 @@ def occurenceclient(client,email,name):
                     if valid_description == False:
                         print("->Descrição\n")
                     result = input(" Prima qualquer teclar para voltar atrás\n")
-                    break
-                else:
+                    #break
+                else:      
                     send('True',client)
                     result=0
                     while result!='1' and result!= '2':
-                        result = input("Pretende fazer submissão do seguinte registo? :\n" + "Data: " + str(date) + "\n" +
-                                    "Hora: " + str(time_string) + "\n" + "Localidade: " + local + "\n" + "Descrição: " + description 
-                                    + "\n 1) Sim \n 2) Não\n")
-                    
+                        result = input("Pretende fazer submissão do seguinte registo? :\n" + "Data: " + str(input_date) + "\n" +
+                                        "Hora: " + str(time_string) + "\n" + "Localidade: " + local + "\n" + "Descrição: " + description 
+                                        + "\n 1) Sim \n 2) Não\n")        
                         if result == '1':
                             send(result,client)
                             result1 = input("Submissão feita\n Prima qualquer tecla para sair\n")
                             send('True', client)
-                                
+                            return               
                         elif result =='2':
                             send(result,client)
                             result1= input("O registo não foi submetido.\n Prima qualquer tecla para voltar atrás\n")
-                break
-
+                            #send('False',client)
+                            break
             elif opt == '6':
                 send(opt,client)
-                continue
+                break
         except Exception as e:
             print(e)
-
+           
 
 
 #==========================================Signup==========================================================#
