@@ -236,7 +236,7 @@ def printall(client, mail, name):
     endofdata = 'False'
     tableelements=[]
     while 1:
-        nrofoccurences = read(client)   #1
+        nrofoccurences = read(client)  #1
         send('testing', client)  #2
         nrofoccurences = int(nrofoccurences)
         if(nrofoccurences == 0):
@@ -254,18 +254,12 @@ def printall(client, mail, name):
                 while read(client) != 'Start':  #9
                     continue
                 while nrofoccurences>0:
-                    while element != 'Stop':
-                        element = read(client)
-                        if element == 'Stop':
-                            send('next', client)
-                            break
-                        else:
-                            tableelements.append(element)
-                        send('next', client) 
+                    
+                    #tableelements = read(client).split(",")
                     nrofoccurences = nrofoccurences-1
-                    table.add_row(tableelements)
-                    tableelements=[]
-                    element=0   
+                    table.add_row(read(client).split(","))
+                    tableelements=[] 
+                    send("next", client)
                 print(table)
             except Exception as e:
                 print(e)

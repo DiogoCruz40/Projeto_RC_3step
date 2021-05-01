@@ -664,7 +664,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
     datatoview = True
     title=['Id_ocorrencia', 'Data', 'Hora', 'Localidade', 'Descrição', 'Id_utilizador', 'Nome de Utilizador']
-
+    
     try:
         if word == True:
             count = 0
@@ -701,8 +701,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             cur.execute("SELECT COUNT(*) FROM ocorrencias WHERE profissional_de_saude_id = %s",client_id,)
             nrofoccurences, = cur.fetchone()
 
-        nrofoccurences=str(nrofoccurences)
-        send(nrofoccurences, conn)   #1
+        send(str(nrofoccurences), conn)   #1
         read(conn, addr)    #2
        
 
@@ -732,30 +731,9 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                 if re.search(client_word.lower(), descricao.lower()):
                     cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
                     user_name, = cur.fetchone()
-                    Id_ocorrencia = Id
-                    Id_ocorrencia = str(Id_ocorrencia)
-                    send(Id_ocorrencia, conn)
-                    read(conn, addr)
-                    Data = Data
-                    Data = str(Data)
-                    send(Data, conn)
-                    read(conn, addr)
-                    Hora = Hora
-                    send(Hora, conn)
-                    read(conn, addr)
-                    Localidade = Local
-                    send(Localidade, conn)
-                    read(conn, addr)
-                    Descricao = descricao
-                    send(Descricao, conn)
-                    read(conn, addr)
-                    Id_utilizador = Id_ut
-                    Id_utilizador = str(Id_utilizador)
-                    send(Id_utilizador, conn)
-                    read(conn, addr)
-                    send(user_name,conn)
-                    read(conn, addr)
-                    send('Stop', conn)
+                    elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
+                    + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
+                    send(elements,conn)
                     read(conn, addr)
             send('True', conn)
 
@@ -766,30 +744,9 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                 if re.search(client_location.lower(), Local.lower()):
                     cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
                     user_name, = cur.fetchone()
-                    Id_ocorrencia = Id
-                    Id_ocorrencia = str(Id_ocorrencia)
-                    send(Id_ocorrencia, conn)
-                    read(conn, addr)
-                    Data = Data
-                    Data = str(Data)
-                    send(Data, conn)
-                    read(conn, addr)
-                    Hora = Hora
-                    send(Hora, conn)
-                    read(conn, addr)
-                    Localidade = Local
-                    send(Localidade, conn)
-                    read(conn, addr)
-                    Descricao = descricao
-                    send(Descricao, conn)
-                    read(conn, addr)
-                    Id_utilizador = Id_ut
-                    Id_utilizador = str(Id_utilizador)
-                    send(Id_utilizador, conn)
-                    read(conn, addr)
-                    send(user_name,conn)
-                    read(conn, addr)
-                    send('Stop', conn)
+                    elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
+                    + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
+                    send(elements,conn)
                     read(conn, addr)
             send('True', conn)
 
@@ -811,30 +768,9 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                 Id,Data,Hora,Local,descricao,Id_ut = row
                 cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
                 user_name, = cur.fetchone()
-                Id_ocorrencia = Id
-                Id_ocorrencia = str(Id_ocorrencia)
-                send(Id_ocorrencia, conn)
-                read(conn, addr)
-                Data = Data
-                Data = str(Data)
-                send(Data, conn)
-                read(conn, addr)
-                Hora = Hora
-                send(Hora, conn)
-                read(conn, addr)
-                Localidade = Local
-                send(Localidade, conn)
-                read(conn, addr)
-                Descricao = descricao
-                send(Descricao, conn)
-                read(conn, addr)
-                Id_utilizador = Id_ut
-                Id_utilizador = str(Id_utilizador)
-                send(Id_utilizador, conn)
-                read(conn, addr)
-                send(user_name,conn)
-                read(conn, addr)
-                send('Stop', conn)
+                elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
+                + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
+                send(elements,conn)
                 read(conn, addr)
             send('True', conn)  
 

@@ -369,12 +369,18 @@ def occurenceclient(client,email,name):
     valid_time = False 
     valid_local = False 
     valid_description = False 
+    display_date = " "
+    display_time = " "
+    display_local = " "
+    display_description = " "
+
     while 1:
         try:
             clear()
             print(f'Hello {name},')
             print('\n   >> Registo de Ocorrências \n')
-            opt = input(' 1) Registo da data \n 2) Registo da hora\n 3) Registo da Localidade\n 4) Descrição da Ocorrência\n 5) Submeter Ocorrência  \n 6) Exit \n')
+            opt = input(' 1) Registo da data' + display_date + ' \n 2) Registo da hora' + display_time +
+                         '\n 3) Registo da Localidade' + display_local + '\n 4) Descrição da Ocorrência' + display_description+ '\n 5) Submeter Ocorrência  \n 6) Exit \n')
             if opt == '1':
                 send(opt,client)
                 input_date = input("Data (formato: YYYY-MM-DD) :\n ")
@@ -386,6 +392,7 @@ def occurenceclient(client,email,name):
                         raise ValueError()
                     valid_date = True
                     send(input_date,client)
+                    display_date = str(' -' + input_date) 
                     result = input("Data guardada\n Prima qualquer tecla para voltar atrás\n")
                     continue 
                 
@@ -401,6 +408,7 @@ def occurenceclient(client,email,name):
                     time.strptime(time_string, '%H:%M')
                     valid_time = True
                     send(time_string,client)
+                    display_time = str(' -' + time_string)
                     result = input("Hora guardada\n Prima qualquer tecla para voltar atrás\n")
                     continue
                 except:
@@ -421,6 +429,7 @@ def occurenceclient(client,email,name):
                     result2 = input("Localidade guardada\n Prima qualquer tecla para voltar atrás\n")
                     valid_local = True 
                     send(local,client)
+                    display_local = str(' -' + local)
                     continue
             elif opt == '4':
                 send(opt,client)
@@ -432,6 +441,7 @@ def occurenceclient(client,email,name):
                         result2 = input("Descrição guardada\n Prima qualquer tecla para voltar atrás\n")
                         valid_description = True
                         send(description,client)
+                        display_description = str(' - Descrição inserida')
                         break
                     elif result =='2':
                         send(result,client)
@@ -446,12 +456,14 @@ def occurenceclient(client,email,name):
                     result = input("Pretende submeter a ocorrencia em modo anónimo?\n 1) Sim\n 2) Não\n")
                     
                     if result == '1':
-                        send(result,client)                          
+                        send(result,client)    
+                        user = "Anonymous"                      
                         while read(client)!='True':
                             continue
                         break
                     elif result == '2':
                         send(result,client)
+                        user = name
                         while read(client)!='True':
                             continue
                         break   
@@ -476,8 +488,8 @@ def occurenceclient(client,email,name):
                     result=0
                     while result!='1' and result!= '2':
                         result = input("Pretende fazer submissão do seguinte registo? :\n" + "Data: " + str(input_date) + "\n" +
-                                        "Hora: " + str(time_string) + "\n" + "Localidade: " + local + "\n" + "Descrição: " + description 
-                                        + "\n 1) Sim \n 2) Não\n")        
+                                        "\n" + "Hora: " + str(time_string) + "\n" + "Localidade: " + local + "\n" + "Descrição: " + description +
+                                        "\n" +"Utilizador: " + str(name) + "\n 1) Sim \n 2) Não\n")        
                         if result == '1':
                             send(result,client)
                             result1 = input("Submissão feita\n Prima qualquer tecla para sair\n")
