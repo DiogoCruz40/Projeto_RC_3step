@@ -216,7 +216,7 @@ def deleteanaccount(client,name):
 
         if read(client) == 'Mail False': #2
             print('Mail doesnt exist')
-            input('Pressiona qualquer tecla para continuar')
+            input('Pressiona qualquer tecla para continuar...')
             continue
         else:
             while 1:
