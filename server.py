@@ -710,6 +710,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
 
         
         send(str(nrofoccurences), conn)   #1   --  #3
+        #print(nrofoccurences)
         read(conn, addr)    #2
        
 
@@ -721,6 +722,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     
     else:
         send('TitleStart', conn)   #3
+        #print(title)
         while read(conn, addr) != 'Ready': #4
             continue
         for x in title:
@@ -738,7 +740,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
                 if re.search(client_word.lower(), descricao.lower()):
-                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
+                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",[Id_ut])
                     user_name, = cur.fetchone()
                     elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
                     + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
@@ -752,7 +754,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
                 if re.search(client_location.lower(), Local.lower()):
-                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
+                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",[Id_ut])
                     user_name, = cur.fetchone()
                     elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
                     + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
@@ -776,7 +778,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
-                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
+                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",[Id_ut])
                 user_name, = cur.fetchone()
                 elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
                 + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))

@@ -245,6 +245,7 @@ def printall(client, mail, name):
     endofdata = 'False'
     while 1:
         nrofoccurences = read(client)  #1
+        #print(nrofoccurences)
         send('testing', client)  #2
         nrofoccurences = int(nrofoccurences)
         if(nrofoccurences == 0):
@@ -255,6 +256,7 @@ def printall(client, mail, name):
                 #Creation of table by parts
                 #part 1 - get the title
                 tittle = gettabletittle(client, mail, name)
+                #print(tittle)
                 table = PrettyTable() 
                 table.field_names = tittle  
                 send('Ready', client)    #8
@@ -262,9 +264,12 @@ def printall(client, mail, name):
                 while read(client) != 'Start':  #9
                     continue
                 while nrofoccurences>0:     
+
                     nrofoccurences = nrofoccurences-1
                     table.add_row(read(client).split(","))
+
                     send("next", client)
+
                 print(table)
             except Exception as e:
                 print(e)
