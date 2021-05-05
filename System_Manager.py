@@ -162,10 +162,10 @@ def validateanaccount(client,name):
         table_securitys.title = 'Security Officers'
         table_securitys.field_names=['Nome do agente','Email do agente','Validado']
         for security in allsecuritys:
-            table_professionals.add_row(security)
+            table_securitys.add_row(security)
         print(table_professionals)
         print(table_securitys)
-        mail = emailREGEXMANAGER('The email of the account you want to validate(0 to exit): ').lower()
+        mail = emailREGEXMANAGER('The account you want to validate(0 to exit): ').lower()
         send(mail,client) #1
         if mail == '0':
             return
@@ -206,17 +206,17 @@ def deleteanaccount(client,name):
         table_securitys.title = 'Security Officers'
         table_securitys.field_names=['Nome do agente','Email do agente','Validado']
         for security in allsecuritys:
-            table_professionals.add_row(security)
+            table_securitys.add_row(security)
         print(table_professionals)
         print(table_securitys)
-        mail = emailREGEXMANAGER('The email of the account you want to validate(0 to exit): ').lower()
+        mail = emailREGEXMANAGER('The account you want to delete(0 to exit): ').lower()
         send(mail,client) #1
         if mail == '0':
             return
 
         if read(client) == 'Mail False': #2
             print('Mail doesnt exist')
-            input('Pressiona qualquer tecla para continuar')
+            input('Pressiona qualquer tecla para continuar...')
             continue
         else:
             while 1:
