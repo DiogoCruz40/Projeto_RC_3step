@@ -241,7 +241,7 @@ def printall(client, mail, name):
         nrofoccurences = int(nrofoccurences)
         if(nrofoccurences == 0):
             print("Não tem ocorrencias disponíveis para visualização de momento\n")
-            break
+            return
         else:
             try:
                 #Creation of table by parts

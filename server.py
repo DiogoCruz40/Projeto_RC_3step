@@ -710,7 +710,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     except Exception as e:
         print(e)
 
-    if nrofoccurences == '0':
+    if nrofoccurences == 0:
         return
     
     else:
