@@ -183,6 +183,7 @@ def occurenceview(client,mail,name):
                 print('\n   >> Consulta de Ocorrências por ' + word + ' na descrição \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
+                break
             elif option == '2':
                 send(option, client)
                 while 1:
@@ -199,6 +200,7 @@ def occurenceview(client,mail,name):
                 print('\n   >> Consulta de Ocorrências pela data ' + date + ' \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
+                break
             elif option == '3':
                 send(option, client)
                 word = wordsREGEX(" Qual a localidade para pesquisar?\n >>")
@@ -208,6 +210,7 @@ def occurenceview(client,mail,name):
                 print('\n   >> Consulta de Ocorrências pela localidade ' + word + ' \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
+                break
             elif option == '4':
                 send(option, client)
                 while 1:
@@ -224,17 +227,22 @@ def occurenceview(client,mail,name):
                 print('\n   >> Consulta de Ocorrências por utilizador com ID ' + str(id_cl) + ' \n\n')
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
+                break
             elif option == '5':
                 send(option, client)
                 break
         
+            else:
+               send('6',client)
+               continue
+
         except Exception as e:
             print(e)
-        break
+
+        
      
 def printall(client, mail, name):
     endofdata = 'False'
-    tableelements=[]
     while 1:
         nrofoccurences = read(client)  #1
         send('testing', client)  #2
@@ -250,15 +258,12 @@ def printall(client, mail, name):
                 table = PrettyTable() 
                 table.field_names = tittle  
                 send('Ready', client)    #8
-                element = 0
+                
                 while read(client) != 'Start':  #9
                     continue
-                while nrofoccurences>0:
-                    
-                    #tableelements = read(client).split(",")
+                while nrofoccurences>0:     
                     nrofoccurences = nrofoccurences-1
                     table.add_row(read(client).split(","))
-                    tableelements=[] 
                     send("next", client)
                 print(table)
             except Exception as e:
