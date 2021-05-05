@@ -542,6 +542,8 @@ def deleteanaccountmanager(conn,addr):
         if cur.rowcount != 0: 
             send('Mail delete', conn)
             if read(conn, addr) == 'Mail Confirm True':
+                cur.execute("DELETE FROM ocorrencias where profissional_de_saude_id=%s",(cur.fetchone()[0],))
+                connDB.commit()
                 cur.execute("Delete from profissional_de_saude where email_p=%s",(mail,))
                 connDB.commit()
             break
@@ -550,6 +552,7 @@ def deleteanaccountmanager(conn,addr):
             if cur.rowcount !=0:
                 send('Mail delete', conn)
                 if read(conn, addr) == 'Mail Confirm True':
+                    
                     cur.execute("Delete from agente_seguranca where email_a=%s",(mail,))
                     connDB.commit()
                 break
@@ -631,9 +634,8 @@ def onloginsecurity(conn,addr,mail):
         try:
             opt = read(conn, addr) #1
             if opt == '1':    
-              
+                occurenceview(conn,addr,mail,True,False,False,False,False)
                 while 1:
-                    occurenceview(conn,addr,mail,True,False,False,False,False)
                     opt2 = read(conn,addr)
                     if opt2 == '1':
                         occurenceview(conn,addr,mail,False,True,False,False,False)
@@ -649,8 +651,6 @@ def onloginsecurity(conn,addr,mail):
                         break
                     elif opt2 == '5':
                         break
-                    elif opt2 == '6':
-                        continue
             elif opt == '2':
                 mail = changeprofilesecurity(conn,addr,mail)
             elif opt == '3':
@@ -667,12 +667,12 @@ def onloginsecurity(conn,addr,mail):
 def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    datatoview = True
+    datatoview = True   
+
     title=['Id_ocorrencia', 'Data', 'Hora', 'Localidade', 'Descrição', 'Id_utilizador', 'Nome de Utilizador']
-    nrofoccurences = 0
+    
     try:
         if word == True:
-            
             count = 0
             client_word = read(conn, addr)  #2
             cur.execute("SELECT descricao FROM ocorrencias")
@@ -680,7 +680,6 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
                 descricao, = row
                 if re.search(client_word.lower(), descricao.lower()):
                     count = count + 1
-                  
             nrofoccurences = count
         
         elif all_selected == True:
@@ -708,9 +707,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             cur.execute("SELECT COUNT(*) FROM ocorrencias WHERE profissional_de_saude_id = %s",[client_id])
             nrofoccurences, = cur.fetchone()
 
-        
         send(str(nrofoccurences), conn)   #1   --  #3
-        #print(nrofoccurences)
         read(conn, addr)    #2
        
 
@@ -722,7 +719,6 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     
     else:
         send('TitleStart', conn)   #3
-        #print(title)
         while read(conn, addr) != 'Ready': #4
             continue
         for x in title:
@@ -735,18 +731,16 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
         send('Start', conn)   #9
     
         if word == True:    
-           
             cur.execute("SELECT * FROM ocorrencias")
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
                 if re.search(client_word.lower(), descricao.lower()):
-                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",[Id_ut])
+                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
                     user_name, = cur.fetchone()
                     elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
                     + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
                     send(elements,conn)
                     read(conn, addr)
-                   
             send('True', conn)
 
         if location == True:   
@@ -754,7 +748,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
                 if re.search(client_location.lower(), Local.lower()):
-                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",[Id_ut])
+                    cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
                     user_name, = cur.fetchone()
                     elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
                     + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
@@ -778,7 +772,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             
             for row in cur.fetchall():
                 Id,Data,Hora,Local,descricao,Id_ut = row
-                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",[Id_ut])
+                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE id = %s",str(Id_ut),)
                 user_name, = cur.fetchone()
                 elements = str(str(Id) + ',' + str(Data)+ ',' + str(Hora)+ ',' 
                 + str(Local)+ ',' + str(descricao)+ ',' + str(Id_ut)+ ',' + str(user_name))
