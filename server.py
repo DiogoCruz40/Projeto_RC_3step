@@ -148,21 +148,23 @@ def occurencemenu(conn,addr,mail):
                 opt2 = read(conn, addr)
                 if opt2 == '1':
                     send('True', conn)
-                    mail = 'anonymous@anonymous.pt'                 
+                    email = 'anonymous@anonymous.pt'                 
                 elif opt2 == '2':
-                    send('True', conn)   
+                    send('True', conn) 
+                    email = mail  
                 try:
                     if read(conn,addr) == 'True': 
                         opt2 = read(conn, addr)
                         if opt2 == '1':
                             sendoccurence = read(conn,addr)
                             if sendoccurence == 'True':
-                                state = occurenceregister(conn,addr,mail,date,time_string,local,description)
+                                state = occurenceregister(conn,addr,email,date,time_string,local,description)
                                 if state == True:
                                     occurence = False
                                     break
                                 else:
                                     occurence = False
+                                    continue
                             else:
                                 continue            
                         elif opt2 == '2':            
@@ -627,8 +629,8 @@ def onloginsecurity(conn,addr,mail):
     login = True
     while login:
         try:
-            opt = read(conn, addr)
-            if opt == '1':    #1
+            opt = read(conn, addr) #1
+            if opt == '1':    
                 occurenceview(conn,addr,mail,True,False,False,False,False)
                 while 1:
                     opt2 = read(conn,addr)
@@ -668,7 +670,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     try:
         if word == True:
             count = 0
-            client_word = read(conn, addr)
+            client_word = read(conn, addr)  #2
             cur.execute("SELECT descricao FROM ocorrencias")
             for row in cur.fetchall():
                 descricao, = row
@@ -701,7 +703,7 @@ def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
             cur.execute("SELECT COUNT(*) FROM ocorrencias WHERE profissional_de_saude_id = %s",client_id,)
             nrofoccurences, = cur.fetchone()
 
-        send(str(nrofoccurences), conn)   #1
+        send(str(nrofoccurences), conn)   #1   --  #3
         read(conn, addr)    #2
        
 

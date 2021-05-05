@@ -146,7 +146,7 @@ def menulogin(client,mail,name):
             print(f'Hello {name},')
             option=input(' 1) Consult occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
             if option == '1':
-                send(option,client)
+                send(option,client) #1
                 occurenceview(client,mail,name)
             elif option == '2':
                 send(option,client)
@@ -175,7 +175,7 @@ def occurenceview(client,mail,name):
             printall(client,mail,name)
             option=input(' 1) Pesquisar por palavra na descrição  \n 2) Pesquisar por data  \n 3) Pesquisar por localidade \n 4) Pesquisar por profisisonal de saude  \n 5) Exit \n Select: ')
             if option == '1':
-                send(option, client)
+                send(option, client)   #2
                 word = wordsREGEX(" Qual a palavra para pesquisar?\n >>")
                 send(word, client)
                 clear()

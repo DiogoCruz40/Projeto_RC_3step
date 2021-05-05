@@ -489,7 +489,7 @@ def occurenceclient(client,email,name):
                     while result!='1' and result!= '2':
                         result = input("Pretende fazer submissão do seguinte registo? :\n" + "Data: " + str(input_date) + "\n" +
                                         "\n" + "Hora: " + str(time_string) + "\n" + "Localidade: " + local + "\n" + "Descrição: " + description +
-                                        "\n" +"Utilizador: " + str(name) + "\n 1) Sim \n 2) Não\n")        
+                                        "\n" +"Utilizador: " + str(user) + "\n 1) Sim \n 2) Não\n")        
                         if result == '1':
                             send(result,client)
                             result1 = input("Submissão feita\n Prima qualquer tecla para sair\n")
@@ -498,8 +498,9 @@ def occurenceclient(client,email,name):
                         elif result =='2':
                             send(result,client)
                             result1= input("O registo não foi submetido.\n Prima qualquer tecla para voltar atrás\n")
-                            #send('False',client)
-                            break
+                            send('False',client)
+                            return
+                            
             elif opt == '6':
                 send(opt,client)
                 break
