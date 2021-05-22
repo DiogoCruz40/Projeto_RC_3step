@@ -28,8 +28,8 @@ CREATE TABLE agente_seguranca (
 CREATE TABLE ocorrencias (
 	id			Serial,
 	data			 TIMESTAMP NOT NULL,
-	hora			 DOUBLE PRECISION NOT NULL,
-	localidade		 VARCHAR(512),
+	hora			 VARCHAR(512) NOT NULL,
+	localidade		 VARCHAR(512) NOT NULL,
 	descricao		 VARCHAR(512) NOT NULL,
 	profissional_de_saude_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
