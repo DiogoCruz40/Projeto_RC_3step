@@ -1,0 +1,40 @@
+CREATE TABLE profissional_de_saude (
+	id	 Serial,
+	nome_p	 VARCHAR(512) NOT NULL,
+	email_p	 VARCHAR(512) UNIQUE NOT NULL,
+	pass	 VARCHAR(512) NOT NULL,
+	validated BOOL NOT NULL DEFAULT FALSE,
+	alarm	 BOOL NOT NULL DEFAULT FALSE,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE gestor_sistema (
+	id	 Serial,
+	nome_g	 VARCHAR(512) NOT NULL,
+	email_g VARCHAR(512) UNIQUE NOT NULL,
+	pass	 VARCHAR(512) NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE agente_seguranca (
+	id	 Serial,
+	nome_a	 VARCHAR(512) NOT NULL,
+	email_a	 VARCHAR(512) UNIQUE NOT NULL,
+	pass	 VARCHAR(512) NOT NULL,
+	validated BOOL NOT NULL DEFAULT FALSE,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE ocorrencias (
+	id			Serial,
+	data			 TIMESTAMP NOT NULL,
+	hora			 DOUBLE PRECISION NOT NULL,
+	localidade		 VARCHAR(512),
+	descricao		 VARCHAR(512) NOT NULL,
+	profissional_de_saude_id BIGINT NOT NULL,
+	PRIMARY KEY(id)
+);
+
+ALTER TABLE ocorrencias ADD CONSTRAINT ocorrencias_fk1 FOREIGN KEY (profissional_de_saude_id) REFERENCES profissional_de_saude(id);
+
+
