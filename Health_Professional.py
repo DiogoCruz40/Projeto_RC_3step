@@ -16,6 +16,7 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 clear = lambda: system('clear')
 
+
 def secure_pass(param):
 
     while True:
