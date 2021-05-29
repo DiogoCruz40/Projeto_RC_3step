@@ -1,3 +1,4 @@
+import select
 import socket
 import threading
 import os
@@ -7,6 +8,9 @@ import re
 import time
 from datetime import datetime
 import datetime
+from datetime import datetime
+import geocoder
+from geopy.geocoders import Nominatim
 
 HEADER = 64
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -14,7 +18,7 @@ SERVER = socket.gethostbyname(socket.gethostname())
 FORMAT = 'utf-8' 
 DISCONNECT_MSG = '!DISCONNECT'
 
-
+AlarmBtn=False
 
 def send(msg, conn):
     message = msg.encode(FORMAT)
@@ -75,8 +79,10 @@ def loginverifyprofessional(conn, addr):
             if verifypass:
                 send('True', conn) #4
 
-                cur.execute("SELECT nome_p FROM profissional_de_saude WHERE email_p=%s and validated=TRUE",(mail,))
-                send(cur.fetchone()[0],conn) #5
+                cur.execute("SELECT id,nome_p FROM profissional_de_saude WHERE email_p=%s and validated=TRUE",(mail,))
+                profissional = cur.fetchone()
+                send(str(profissional[0]),conn)
+                send(str(profissional[1]),conn) #5
                 break
             else:
                 send('False', conn) #4
@@ -117,6 +123,8 @@ def onloginprofessional(conn,addr,mail):
                 if delete == True:
                     login = False
             elif opt == '4':
+                onalarmprofessional(conn,addr,mail)
+            elif opt == '5':
                 login = False      
 
         except Exception as e:
@@ -338,6 +346,8 @@ def eraseaccountprofessional(conn,addr,mail):
             if deleteconfirm == 'y':
                 cur.execute('SELECT id FROM profissional_de_saude where email_p=%s',(mail,))
                 id_profissional = cur.fetchone()[0]
+                cur.execute("DELETE FROM alarms where profissional_de_saude_id=%s",(id_profissional,))
+                connDB.commit()
                 cur.execute("DELETE FROM ocorrencias where profissional_de_saude_id=%s",(id_profissional,))
                 connDB.commit()
                 cur.execute("DELETE FROM profissional_de_saude where email_p=%s",(mail,))
@@ -542,7 +552,10 @@ def deleteanaccountmanager(conn,addr):
         if cur.rowcount != 0: 
             send('Mail delete', conn)
             if read(conn, addr) == 'Mail Confirm True':
-                cur.execute("DELETE FROM ocorrencias where profissional_de_saude_id=%s",(cur.fetchone()[0],))
+                id_profissional = cur.fetchone()[0]
+                cur.execute("DELETE FROM alarms where profissional_de_saude_id=%s",(id_profissional,))
+                connDB.commit()
+                cur.execute("DELETE FROM ocorrencias where profissional_de_saude_id=%s",(id_profissional,))
                 connDB.commit()
                 cur.execute("Delete from profissional_de_saude where email_p=%s",(mail,))
                 connDB.commit()
@@ -568,6 +581,7 @@ def deleteanaccountmanager(conn,addr):
 def handle_security(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     connected = True
+
     send('Security Officer CONNECTED', conn)
     while connected:
 
@@ -658,6 +672,8 @@ def onloginsecurity(conn,addr,mail):
                 if delete == True:
                     login = False
             elif opt == '4':
+                consultalarmssecurity(conn,addr,mail)
+            elif opt == '6':
                 login = False      
 
         except Exception as e:
@@ -977,20 +993,154 @@ def signupverifysecurity(conn, addr):
     connDB.close()
     cur.close()
     return
+#============================================================================================================================#
 
+def consultalarmssecurity(conn,addr,mail):
+    global AlarmBtn
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("SELECT COUNT(atendido) FROM alarms WHERE atendido=False;")
+    if cur.fetchone()[0] == 0:
+        send('All answered',conn) #1
+        AlarmBtn = False
+    else:
+        send('Missing answered',conn) #1
+        AlarmBtn = True
+
+    while True:
+        cur.execute("SELECT id_alarm,nome_p,email_p,data_hora,localizacao,atendido from profissional_de_saude inner join alarms on profissional_de_saude.id=alarms.profissional_de_saude_id")
+        send(str(cur.fetchall()),conn) #2
+        intflag = read(conn,addr)
+        if intflag == 'Not int':
+            continue
+        id_alarm = read(conn,addr)
+        if id_alarm == '0':
+            return
+        
+        cur.execute("SELECT id,id_alarm,nome_p,email_p,data_hora,localizacao,atendido from profissional_de_saude inner join alarms on profissional_de_saude.id=alarms.profissional_de_saude_id where id_alarm=%s and atendido=False",[id_alarm])
+        if cur.rowcount == 0:
+            send('id False',conn)
+            continue
+        else:
+            send('id true',conn)
+            if read(conn,addr) == 'ID Confirm True':
+                email_prof = cur.fetchone()[2]
+                cur.execute("UPDATE alarms SET atendido=true where id_alarm=%s",[id_alarm])
+                connDB.commit()
+                cur.execute("SELECT COUNT(atendido) from profissional_de_saude inner join alarms on profissional_de_saude.id=alarms.profissional_de_saude_id where atendido=False and email_p=%s",(email_prof,))
+                if cur.fetchone()[0] == 0:
+                    cur.execute("UPDATE profissional_de_saude set alarm=false where email_p=%s",(email_prof,))
+                    connDB.commit()
+                cur.execute("SELECT COUNT(atendido) FROM alarms WHERE atendido=False;")
+
+                if cur.fetchone()[0] == 0:
+                    send('All answered',conn)
+                    AlarmBtn = False
+                else:
+                    send('Missing answered',conn)
+                    AlarmBtn = True
+            break
+    cur.close()
+    connDB.close()
+
+def onalarmprofessional(conn,addr,mail):
+    global AlarmBtn 
+    g = geocoder.ip('me')
+    str1=','.join(map(str, g.latlng))
+    geolocator = Nominatim(user_agent="Sistema_Ocorrencias")
+    location = geolocator.reverse(str1)
+
+    AlarmBtn= True
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT id FROM profissional_de_saude WHERE email_p=%s",(mail,))
+    id_prof=cur.fetchone()[0]
+    cur.execute("INSERT INTO alarms(data_hora, localizacao, profissional_de_saude_id) VALUES (%s,%s,%s)",(datetime.now(),location.address,id_prof))
+    connDB.commit()
+    cur.execute("UPDATE profissional_de_saude SET alarm=True where id=%s",[id_prof])
+    connDB.commit()
+    connDB.close()
+    cur.close()
+    return
+
+def handle_alarm_prof(conn,addr):
+
+    while True:
+        ready = select.select([conn], [], [], 0.3)
+
+        if ready[0]:
+            if read(conn,addr) == 'get out':
+                return
+
+        connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+        cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT id_alarm,profissional_de_saude_id FROM alarms WHERE sent=false and atendido=true limit 1")
+        if cur.rowcount != 0:
+            ids = cur.fetchone()
+            id_alarm=ids[0]
+            id_profi=ids[1]
+            send(str(id_profi),conn)
+            cur.execute("UPDATE alarms set sent=true where atendido=true and id_alarm=%s",[id_alarm])
+            connDB.commit()
+        cur.close()
+        connDB.close()
+
+
+def handle_alarm(conn,addr):
+
+    global AlarmBtn
+
+    while True:
+
+        ready = select.select([conn], [], [], 0.3)
+
+        if ready[0]:
+            if read(conn,addr) == 'get out':
+                return
+            
+        if AlarmBtn:
+            send("Alarm", conn)
+            check = alarmmenu(conn,addr)
+            if check:
+                return
+        
+
+def alarmmenu(conn,addr):
+
+    global AlarmBtn
+    print("=========================ALARM=====================")
+    flag = read(conn,addr)
+    if flag == 'discard':
+        print("=========================ALARM OFF=====================")
+        AlarmBtn=False
+        return False
+    else:
+        return True
+    
 #============================================================================================================================#
 # IF doesn't start try:
 #lsof -iTCP:8100 -sTCP:LISTEN
 #lsof -iTCP:8200 -sTCP:LISTEN
 #lsof -iTCP:8300 -sTCP:LISTEN
+#lsof -iTCP:8400 -sTCP:LISTEN
 
 #kill -9 <Pid Number>
 
 def start(PORT, SERVER):
+    global AlarmBtn
     ADDR =  (SERVER, PORT)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
+    connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
+    cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT COUNT(atendido) FROM alarms WHERE atendido=False;')
+    if cur.fetchone()[0] != 0:
+        AlarmBtn=True
+    connDB.close()
+    cur.close()
+
     print(f'[LISTENING] Server is listening on {SERVER}')
     while True:
         (conn,addr) = server.accept()
@@ -1000,35 +1150,62 @@ def start(PORT, SERVER):
             thread = threading.Thread(target=handle_manager, args=(conn, addr))
         elif PORT == 8300:
             thread = threading.Thread(target=handle_security , args=(conn, addr))
+        elif PORT == 8400:
+            thread = threading.Thread(target=handle_alarm , args=(conn, addr))
+        elif PORT == 8500:
+            thread = threading.Thread(target=handle_alarm_prof , args=(conn, addr))
         thread.start()
-        
-        if PORT==8100:
-            print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Health_Professionals")
-        if PORT==8200:
-            print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of System_Managers")
-        if PORT==8300:
-            print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Security officers")
+        print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+        #if PORT==8100:
+        #    print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Health_Professionals")
+        #if PORT==8200:
+        #    print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of System_Managers")
+       # if PORT==8300:
+         #   print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Security officers")
+       # if PORT==8400:
+          #  print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1} of Alarm Handlers")
 
 
 def main(SERVER):
+    
     print("[STARTING] server is starting...")
-    pid = os.fork()
+    #pid = os.fork()
     
-    if pid == 0 :
-        print('Health Professional')
-        start(8100, SERVER)
+#    if pid == 0 :
+ #       print('Health Professional')
+  #      start(8100, SERVER)
 
-    else:
-        pid2 = os.fork()
-        if pid2 == 0:
-            print('System Manager')
-            start(8200, SERVER)
+   # else:
+    #    pid2 = os.fork()
+     #   if pid2 == 0:
+      #      print('System Manager')
+        #    start(8200, SERVER)
     
-        else:
-            print('Security Officer')
-            start(8300, SERVER)
+        #else:
+         #   pid3 = os.fork()
+          #  if pid3 == 0:
+           #     print('Security Officer')
+            #    start(8300, SERVER)
+
+           # else:
+            #    print('Alarm Handler')
+             #   start(8400, SERVER)
+
+    print('Health Professional')
+    thread1 = threading.Thread(target=start, args=(8100, SERVER))
+    thread1.start()
+    print('System Manager')
+    thread2 = threading.Thread(target=start, args=(8200, SERVER))
+    thread2.start()
+    print('Security Officer')
+    thread3 = threading.Thread(target=start, args=(8300, SERVER))
+    thread3.start()
+    print('Alarm Handler Security')
+    thread4 = threading.Thread(target=start, args=(8400, SERVER))
+    thread4.start()
+    print('Alarm Handler Professional')
+    thread5 = threading.Thread(target=start, args=(8500, SERVER))
+    thread5.start()
        
-
-
 if __name__ == "__main__":
     main(SERVER)

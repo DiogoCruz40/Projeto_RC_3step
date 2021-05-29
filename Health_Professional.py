@@ -1,4 +1,6 @@
+import select
 import socket
+import threading
 import stdiomask
 from passlib.handlers.sha2_crypt import sha256_crypt
 import re
@@ -7,6 +9,7 @@ import time
 from datetime import datetime
 import datetime
 from dateutil.relativedelta import relativedelta
+import unicodedata
 
 HEADER = 64
 PORT = 8100
@@ -15,7 +18,7 @@ DISCONNECT_MSG = '!DISCONNECT'
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 clear = lambda: system('clear')
-
+time_to_exit = False
 
 def secure_pass(param):
 
@@ -104,7 +107,11 @@ def login(client):
         send(password, client) #3
         flagpass=read(client) #4
         if  flagpass == 'True':
+            
+            id_prof = read(client)
             name=read(client)
+            thread=threading.Thread(target=handle_alarme_professional,args=(SERVER,8500,id_prof))
+            thread.start()
             menulogin(client,mail,name)
             break
         elif flagpass == 'False':
@@ -123,17 +130,19 @@ def login(client):
 
 
 def menulogin(client,mail,name):
-
+    global time_to_exit
     delete = False    
     while 1:
 
         if delete == True:
+            time_to_exit=True
             break
 
         try:
             clear()
             print(f'Hello {name},')
-            option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Exit \n Select: ')
+            option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Alarm\n 5) Exit \n Select: ')
+
             if option == '1':
                 send(option,client)
                 createoccurence(client,mail,name)
@@ -145,10 +154,26 @@ def menulogin(client,mail,name):
             elif option == '3':
                 send(option,client)
                 delete = eraseaccount(client,mail,name)
+            
             elif option == '4':
                 send(option,client)
+                alarmpush(name)
+                
+            elif option == '5':
+                send(option,client)
+                time_to_exit=True
                 return
                 
+        except Exception as e:
+            print(e)
+
+#==============Alarm Push====================================#
+def alarmpush(name):
+        try:
+            clear()
+            print(f'Hello {name},')
+            print('YOU PUSHED THE ALARM BUTTON')
+            input('Press any key to continue...')
         except Exception as e:
             print(e)
 
@@ -566,7 +591,25 @@ def signup(client):
                     continue
             break
 
-   
+#==========================================================================================================#
+  
+def handle_alarme_professional(SERVER_ALARM,PORT_ALARM,id_prof):
+    ADDR_ALARM=(SERVER_ALARM,PORT_ALARM)
+    client_alarm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_alarm.connect(ADDR_ALARM)
+    global alarm,time_to_exit
+
+    while not time_to_exit:
+
+        ready = select.select([client_alarm], [], [], 0.3)
+        if ready[0]:
+            if read(client_alarm) == str(id_prof):
+                print('\n \t\tSOMOENE IS ON YOUR RESCUE!HOLD ON!\n \t\tPRESS ANY KEY TO CONTINUE...')
+                
+    send('get out',client_alarm)
+    client_alarm.close()
+    return
+
 #==========================================================================================================#
 
 def main():
