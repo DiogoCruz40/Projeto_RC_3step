@@ -55,7 +55,7 @@ def handle_professional(conn, addr):
                 onloginprofessional(conn,addr,mail)
             elif opt == '2':
                 signupverifyprofessional(conn, addr)
-            elif opt == '3':
+            elif opt == '4':
                 connected = False      
 
         except Exception as e:
@@ -124,7 +124,7 @@ def onloginprofessional(conn,addr,mail):
                     login = False
             elif opt == '4':
                 onalarmprofessional(conn,addr,mail)
-            elif opt == '5':
+            elif opt == '6':
                 login = False      
 
         except Exception as e:
@@ -181,7 +181,7 @@ def occurencemenu(conn,addr,mail):
                         continue
                 except:
                     print("Erro :(")                    
-            elif opt == '6':
+            elif opt == '7':
                 occurence = False
         except Exception as e:
             print(e)
@@ -223,7 +223,7 @@ def changeprofileprofessional(conn,addr,mail):
                 changepasswordprofessional(conn,addr,mail)
             elif opt == '3':
                 changenameprofessional(conn,addr,mail)
-            elif opt == '4':
+            elif opt == '5':
                 changeprofile = False      
 
         except Exception as e:
@@ -594,7 +594,7 @@ def handle_security(conn, addr):
                 onloginsecurity(conn,addr,mail)
             elif opt == '2':
                 signupverifysecurity(conn, addr)
-            elif opt == '3':
+            elif opt == '4':
                 connected = False      
 
         except Exception as e:
@@ -663,7 +663,7 @@ def onloginsecurity(conn,addr,mail):
                     elif opt2 == '4':
                         occurenceview(conn,addr,mail,False,False,False,False,True)
                         break
-                    elif opt2 == '5':
+                    elif opt2 == '6':
                         break
             elif opt == '2':
                 mail = changeprofilesecurity(conn,addr,mail)

@@ -180,6 +180,7 @@ def menulogin(client,mail,name):
                 profile = changeprofile(client,mail,name)
                 mail = profile[0]
                 name = profile[1]
+
             elif option == '3':
                 send(option,client)
                 delete = eraseaccount(client,mail,name)
@@ -187,6 +188,10 @@ def menulogin(client,mail,name):
             elif option == '4':
                 send(option,client)
                 alarmconsult(client,mail,name)
+            
+            elif option == '5':
+                show_security_menu2_help()
+
             elif option == '6':
                 send(option,client)
                 return
@@ -207,7 +212,7 @@ def occurenceview(client,mail,name):
             global alarm
             if alarm == True:
                 print('\nALARM ACTIVATED!!!\n')
-            option=input(' 1) Pesquisar por palavra na descrição  \n 2) Pesquisar por data  \n 3) Pesquisar por localidade \n 4) Pesquisar por profisisonal de saude  \n 5) Exit \n Select: ')
+            option=input(' 1) Pesquisar por palavra na descrição  \n 2) Pesquisar por data  \n 3) Pesquisar por localidade \n 4) Pesquisar por profisisonal de saude  \n 5) Help \n 6) Exit \n Select: ')
             if option == '1':
                 send(option, client)   #2
                 word = wordsREGEX(" Qual a palavra para pesquisar?\n >>")
@@ -262,7 +267,11 @@ def occurenceview(client,mail,name):
                 printall(client,mail,name)
                 result = input("\n Prima qualquer tecla para voltar atrás\n")
                 break
+            
             elif option == '5':
+                show_security_menu3_help()
+
+            elif option == '6':
                 send(option, client)
                 break
         
@@ -668,6 +677,43 @@ def handle_alarme_security(SERVER_ALARM,PORT_ALARM):
     send('get out',client_alarm)
     client_alarm.close()
     return
+
+#==========================================================================================================#
+
+def show_security_menu1_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Este é o primeiro menu da tua aplicação.')
+        print(' Aqui vais ter que criar uma conta selecionando a\n opção “2”, caso já estejas registado podes iniciar\n sessão selecionando a opção “1”. Para voltar ao\n menu anterior pressiona a opção “4”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)   
+
+def show_security_menu2_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Na opção “1” podes consultar ocorrências')
+        print(' detalhadas com alguns pormenores\n submetidas por profissionais de saúde.\n Selecionando a opção “2” podes alterar alguns\n dados da tua conta.\n Para apagares a tua conta pressiona a opção “3”.\n Para consultar alarmes emitidos pelos\n profissionais de saúde é só selecionar a opção\n “4”. Aqui consegues ter acesso aos alarmes\n recentes e sabes quais ainda não foram\n correspondidos.\n Para voltar ao menu anterior e terminar\n sessão seleciona a opção “6”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)   
+
+
+def show_security_menu3_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Aqui podes consultar as ocorrências')
+        print(' submetidas pelos profissionais de saúde.\n Caso pretendas fazer uma consulta mais\n específica podes usar os filtros disponíveis.\n Selecionando a opção “1” podes pesquisar\n por palavra na descrição da ocorrência. Caso\n queiras ver as ocorrências numa data em\n específico seleciona a opção “2”. Para\n procurar ocorrências por localidade seleciona\n a opção “3”. Para veres as ocorrências\n submetidas por um profissional de saúde\n podes selecionar a opção “4”. \n podes selecionar a opção “4”. \n opção “6”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)   
+
 #==========================================================================================================#
 
 def main():
@@ -678,7 +724,7 @@ def main():
         try:
             clear();
             print('Menu Security Officer')
-            opt=input(' 1) Login\n 2) Sign up\n 3) Exit \n Select: ')
+            opt=input(' 1) Login\n 2) Sign up\n 3) Help\n 4) Exit \n Select: ')
             if opt == '1':
                 send(opt,client)
                 login(client)
@@ -686,6 +732,9 @@ def main():
                 send(opt,client)
                 signup(client)
             elif opt == '3':
+                show_security_menu1_help()
+
+            elif opt == '4':
                 send(opt,client)
                 global time_to_exit
                 time_to_exit = True

@@ -141,7 +141,7 @@ def menulogin(client,mail,name):
         try:
             clear()
             print(f'Hello {name},')
-            option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Alarm\n 5) Exit \n Select: ')
+            option=input(' 1) Create occurrence\n 2) Change profile\n 3) Erase account\n 4) Alarm\n 5) Help\n 6) Exit \n Select: ')
 
             if option == '1':
                 send(option,client)
@@ -158,15 +158,18 @@ def menulogin(client,mail,name):
             elif option == '4':
                 send(option,client)
                 alarmpush(name)
-                
+            
             elif option == '5':
+                show_prof_menu2_help()
+
+            elif option == '6':
                 send(option,client)
                 time_to_exit=True
                 return
                 
         except Exception as e:
             print(e)
-
+     
 #==============Alarm Push====================================#
 def alarmpush(name):
         try:
@@ -185,7 +188,7 @@ def changeprofile(client,mail,name):
             clear()
             print(f'Hello {name},')
             print('\nProfile')
-            option=input(' 1) Change email\n 2) Change password\n 3) Change name \n 4) Exit \n Select: ')
+            option=input(' 1) Change email\n 2) Change password\n 3) Change name \n 4) Help\n 5) Exit \n Select: ')
             if option == '1':
                 send(option,client)
                 mail = changemail(client,mail,name)
@@ -196,6 +199,9 @@ def changeprofile(client,mail,name):
                 send(option,client)
                 name = changename(client,mail,name)
             elif option == '4':
+                show_prof_menu3_help()
+
+            elif option == '5':
                 send(option,client)
                 return [mail, name]
                 
@@ -406,7 +412,7 @@ def occurenceclient(client,email,name):
             print(f'Hello {name},')
             print('\n   >> Registo de Ocorrências \n')
             opt = input(' 1) Registo da data' + display_date + ' \n 2) Registo da hora' + display_time +
-                         '\n 3) Registo da Localidade' + display_local + '\n 4) Descrição da Ocorrência' + display_description+ '\n 5) Submeter Ocorrência  \n 6) Exit \n')
+                         '\n 3) Registo da Localidade' + display_local + '\n 4) Descrição da Ocorrência' + display_description+ '\n 5) Submeter Ocorrência  \n 6) Help\n 7) Exit \n')
             if opt == '1':
                 send(opt,client)
                 input_date = input("Data (formato: YYYY-MM-DD) :\n ")
@@ -526,8 +532,11 @@ def occurenceclient(client,email,name):
                             result1= input("O registo não foi submetido.\n Prima qualquer tecla para voltar atrás\n")
                             send('False',client)
                             return
-                            
+
             elif opt == '6':
+                show_prof_menu4_help() 
+                             
+            elif opt == '7':
                 send(opt,client)
                 break
         except Exception as e:
@@ -612,6 +621,50 @@ def handle_alarme_professional(SERVER_ALARM,PORT_ALARM,id_prof):
 
 #==========================================================================================================#
 
+def show_prof_menu1_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Este é o primeiro menu da tua aplicação.')
+        print(' Aqui vais ter que criar uma conta selecionando a\n opção “2”, caso já estejas registado podes\n iniciar sessão selecionando a opção “1”. Para\n voltar ao menu anterior pressiona a opção “4”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)   
+
+def show_prof_menu2_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Na opção “1” podes registar uma ocorrência')
+        print(' detalhando alguns pormenores da mesma.\n opção “2”, caso já estejas registado podes\n\n Selecionando a opção “2” podes alterar alguns\n dados da tua conta.\n Para apagares a tua conta pressiona a opção “3”.\n Para emitir um alarme em tempo real que alerta\n agentes de segurança é só selecionar a opção “4”.\n Para voltar ao menu anterior e terminar sessão\n seleciona a opção “6”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)   
+
+def show_prof_menu3_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Aqui podes alterar o teu email selecionando a opção “1”')
+        print(' , alterar a tua password selecionando a opção\n “2” ou o teu nome na opção “3”.\n\n Para voltar ao menu anterior seleciona a opção “5”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)
+        
+def show_prof_menu4_help():
+    try:
+        clear()
+        print(' Ola!\n')
+        print(' Para o registo de uma ocorrência tens de preencher')
+        print(' todas as opções de 1 a 4 que correspondem à data,\n hora, localidade e descrição da ocorrência,\n respetivamente.\n\n Depois de todos os campos estarem devidamente\n preenchidos seleciona a opção “5” e confirma para\n submeteres a ocorrência.\n\n Para voltar atrás seleciona a opção “7”.\n')
+        print(' Obrigado!')
+        input(' \n Press any key to continue...')
+    except Exception as e:
+        print(e)     
+#==========================================================================================================#        
 def main():
     
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -621,7 +674,7 @@ def main():
         try:
             clear();
             print('Menu Health Professional')
-            opt=input(' 1) Login\n 2) Sign up\n 3) Exit \n Select: ')
+            opt=input(' 1) Login\n 2) Sign up\n 3) Help\n 4) Exit\n Select: ')
             if opt == '1':
                 send(opt,client)
                 login(client)
@@ -629,6 +682,8 @@ def main():
                 send(opt,client)
                 signup(client)
             elif opt == '3':
+                show_prof_menu1_help()
+            elif opt == '4':
                 send(opt,client)
                 return
                 
