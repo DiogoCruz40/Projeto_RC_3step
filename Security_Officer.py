@@ -202,14 +202,14 @@ def menulogin(client,mail,name):
 
 #==============Consult Occurence====================================#
 def occurenceview(client,mail,name):
-    
+    global alarm
     while 1:
         try:
             clear()
             print(f'\nHello {name},')
             print('\n   >> Consulta de Ocorrências \n\n')
             printall(client,mail,name)
-            global alarm
+            
             if alarm == True:
                 print('\nALARM ACTIVATED!!!\n')
             option=input(' 1) Pesquisar por palavra na descrição  \n 2) Pesquisar por data  \n 3) Pesquisar por localidade \n 4) Pesquisar por profisisonal de saude  \n 5) Help \n 6) Exit \n Select: ')
@@ -276,7 +276,7 @@ def occurenceview(client,mail,name):
                 break
         
             else:
-               send('6',client)
+               send('9',client)
                continue
 
         except Exception as e:
@@ -708,7 +708,7 @@ def show_security_menu3_help():
         clear()
         print(' Ola!\n')
         print(' Aqui podes consultar as ocorrências')
-        print(' submetidas pelos profissionais de saúde.\n Caso pretendas fazer uma consulta mais\n específica podes usar os filtros disponíveis.\n Selecionando a opção “1” podes pesquisar\n por palavra na descrição da ocorrência. Caso\n queiras ver as ocorrências numa data em\n específico seleciona a opção “2”. Para\n procurar ocorrências por localidade seleciona\n a opção “3”. Para veres as ocorrências\n submetidas por um profissional de saúde\n podes selecionar a opção “4”. \n podes selecionar a opção “4”. \n opção “6”.\n')
+        print(' submetidas pelos profissionais de saúde.\n Caso pretendas fazer uma consulta mais\n específica podes usar os filtros disponíveis.\n Selecionando a opção “1” podes pesquisar\n por palavra na descrição da ocorrência. Caso\n queiras ver as ocorrências numa data em\n específico seleciona a opção “2”. Para\n procurar ocorrências por localidade seleciona\n a opção “3”. Para veres as ocorrências\n submetidas por um profissional de saúde\n podes selecionar a opção “4”. \n Para voltar ao menu anterior seleciona a \n opção “6”.\n')
         print(' Obrigado!')
         input(' \n Press any key to continue...')
     except Exception as e:

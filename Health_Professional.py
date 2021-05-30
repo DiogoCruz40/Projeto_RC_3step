@@ -637,7 +637,7 @@ def show_prof_menu2_help():
         clear()
         print(' Ola!\n')
         print(' Na opção “1” podes registar uma ocorrência')
-        print(' detalhando alguns pormenores da mesma.\n opção “2”, caso já estejas registado podes\n\n Selecionando a opção “2” podes alterar alguns\n dados da tua conta.\n Para apagares a tua conta pressiona a opção “3”.\n Para emitir um alarme em tempo real que alerta\n agentes de segurança é só selecionar a opção “4”.\n Para voltar ao menu anterior e terminar sessão\n seleciona a opção “6”.\n')
+        print(' detalhando alguns pormenores da mesma.\n\n Selecionando a opção “2” podes alterar alguns\n dados da tua conta.\n Para apagares a tua conta pressiona a opção “3”.\n Para emitir um alarme em tempo real que alerta\n agentes de segurança é só selecionar a opção “4”.\n Para voltar ao menu anterior e terminar sessão\n seleciona a opção “6”.\n')
         print(' Obrigado!')
         input(' \n Press any key to continue...')
     except Exception as e:

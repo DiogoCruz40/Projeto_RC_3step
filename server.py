@@ -6,9 +6,8 @@ import psycopg2.extras
 from passlib.handlers.sha2_crypt import sha256_crypt
 import re
 import time
-from datetime import datetime
+from datetime import date, datetime
 import datetime
-from datetime import datetime
 import geocoder
 from geopy.geocoders import Nominatim
 
@@ -648,8 +647,8 @@ def onloginsecurity(conn,addr,mail):
         try:
             opt = read(conn, addr) #1
             if opt == '1':    
-                occurenceview(conn,addr,mail,True,False,False,False,False)
                 while 1:
+                    occurenceview(conn,addr,mail,True,False,False,False,False)
                     opt2 = read(conn,addr)
                     if opt2 == '1':
                         occurenceview(conn,addr,mail,False,True,False,False,False)
@@ -665,6 +664,8 @@ def onloginsecurity(conn,addr,mail):
                         break
                     elif opt2 == '6':
                         break
+                    else:
+                        continue
             elif opt == '2':
                 mail = changeprofilesecurity(conn,addr,mail)
             elif opt == '3':
@@ -676,15 +677,16 @@ def onloginsecurity(conn,addr,mail):
             elif opt == '6':
                 login = False      
 
+            else:
+                continue
         except Exception as e:
             print(e)
     return
-
 def occurenceview(conn,addr,mail, all_selected, word,date, location,id_cl):
     connDB = psycopg2.connect("host=localhost dbname=postgres user=postgres password=postgres")
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
     datatoview = True   
-
+    nrofoccurences=0
     title=['Id_ocorrencia', 'Data', 'Hora', 'Localidade', 'Descrição', 'Id_utilizador', 'Nome de Utilizador']
     
     try:
@@ -1011,10 +1013,10 @@ def consultalarmssecurity(conn,addr,mail):
     while True:
         cur.execute("SELECT id_alarm,nome_p,email_p,data_hora,localizacao,atendido from profissional_de_saude inner join alarms on profissional_de_saude.id=alarms.profissional_de_saude_id")
         send(str(cur.fetchall()),conn) #2
-        intflag = read(conn,addr)
+        intflag = read(conn,addr) #11
         if intflag == 'Not int':
             continue
-        id_alarm = read(conn,addr)
+        id_alarm = read(conn,addr) #12
         if id_alarm == '0':
             return
         
@@ -1056,7 +1058,7 @@ def onalarmprofessional(conn,addr,mail):
     cur = connDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT id FROM profissional_de_saude WHERE email_p=%s",(mail,))
     id_prof=cur.fetchone()[0]
-    cur.execute("INSERT INTO alarms(data_hora, localizacao, profissional_de_saude_id) VALUES (%s,%s,%s)",(datetime.now(),location.address,id_prof))
+    cur.execute("INSERT INTO alarms(data_hora, localizacao, profissional_de_saude_id) VALUES (%s,%s,%s)",(datetime.datetime.now(),location.address,id_prof))
     connDB.commit()
     cur.execute("UPDATE profissional_de_saude SET alarm=True where id=%s",[id_prof])
     connDB.commit()
